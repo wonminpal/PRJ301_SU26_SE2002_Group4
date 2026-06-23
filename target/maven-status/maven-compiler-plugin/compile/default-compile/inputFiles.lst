@@ -1,0 +1,14 @@
+D:\Java_Projects\PRJ_301_Project\src\main\java\com\mycompany\prj_301_project\resources\JakartaEE10Resource.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\controller\DetailServlet.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\model\CartItem.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\com\mycompany\prj_301_project\JakartaRestConfiguration.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\controller\HomeServlet.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\controller\OrderServlet.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\db\DBContext.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\dao\ProductDAO.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\model\Cart.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\controller\CartServlet.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\dao\CartDAO.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\dao\OrderDAO.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\model\Order.java
+D:\Java_Projects\PRJ_301_Project\src\main\java\model\Product.java
