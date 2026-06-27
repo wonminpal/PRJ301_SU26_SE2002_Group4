@@ -12,6 +12,7 @@
         <meta charset="UTF-8">
         <title>Bán hàng điện tử - PRJ301</title>
         <link href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     </head>
     <body>
 

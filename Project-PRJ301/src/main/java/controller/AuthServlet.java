@@ -4,6 +4,7 @@
  */
 package controller;
 
+import util.VerifyRecaptcha;
 import dao.CartDAO;
 import dao.UserDAO;
 import jakarta.servlet.ServletException;
@@ -37,41 +38,6 @@ public class AuthServlet extends HttpServlet {
         userDao = new UserDAO();
     }
 
-    // HÀM GỌI API GOOGLE ĐỂ LẤY ĐIỂM BONUS
-    private boolean verifyRecaptcha(String recaptchaResponse) {
-        if (recaptchaResponse == null || recaptchaResponse.isEmpty()) {
-            return false;
-        }
-        try {
-            String url = "https://www.google.com/recaptcha/api/siteverify";
-            // TODO: Bạn (Phát) cần thay thế Secret Key thật lấy từ Google reCAPTCHA Admin
-            String secret = "YOUR_GOOGLE_SECRET_KEY";
-            String params = "secret=" + secret + "&response=" + recaptchaResponse;
-
-            HttpURLConnection http = (HttpURLConnection) new URL(url).openConnection();
-            http.setDoOutput(true);
-            http.setRequestMethod("POST");
-            http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-            try (OutputStream out = http.getOutputStream()) {
-                out.write(params.getBytes("UTF-8"));
-            }
-
-            try (InputStream res = http.getInputStream(); BufferedReader rd = new BufferedReader(new InputStreamReader(res, "UTF-8"))) {
-                StringBuilder sb = new StringBuilder();
-                int cp;
-                while ((cp = rd.read()) != -1) {
-                    sb.append((char) cp);
-                }
-                // Nếu JSON trả về chứa "success": true tức là người thật (không phải bot)
-                return sb.toString().contains("\"success\": true");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
         if ("logout".equals(action)) {
@@ -90,22 +56,18 @@ public class AuthServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("action");
-
-        // Lấy token reCAPTCHA từ form gửi lên
         String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
 
-        // KIỂM TRA BOT (Bỏ comment dòng dưới khi có key thật để bắt đầu tính năng)
-        /*
-        if (!verifyRecaptcha(gRecaptchaResponse)) {
+        if (!VerifyRecaptcha.verify(gRecaptchaResponse)) {
             request.setAttribute("errorMessage", "Vui lòng xác thực bạn không phải là Robot!");
-            if ("register".equals(action)) {
-                request.getRequestDispatcher("/views/account/register.jsp").forward(request, response);
+            if ("register".equals(action) || "signup".equals(action)) {
+                request.getRequestDispatcher("/WEB-INF/views/account/register.jsp").forward(request, response);
             } else {
-                request.getRequestDispatcher("/views/account/login.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/views/account/login.jsp").forward(request, response);
             }
             return;
         }
-         */
+
         if ("login".equals(action) || "signin".equals(action)) {
             String email = request.getParameter("email");
             String password = request.getParameter("password");

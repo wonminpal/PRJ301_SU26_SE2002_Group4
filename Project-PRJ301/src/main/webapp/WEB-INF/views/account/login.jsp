@@ -33,7 +33,7 @@
                             <input type="password" name="password" class="form-control" required>
                         </div>
 
-                        <div class="g-recaptcha mb-3" data-sitekey="YOUR_GOOGLE_SITE_KEY"></div>
+                        <div class="g-recaptcha mb-3" data-sitekey="6LfN6DctAAAAAOItk7tox7vwWdgWcMXp5VUM17nT"></div>
 
                         <button type="submit" class="btn btn-dark w-100 fw-bold">Đăng nhập</button>
 
