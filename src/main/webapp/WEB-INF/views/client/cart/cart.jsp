@@ -6,12 +6,12 @@ a<%--
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-
-<jsp:include page="/WEB-INF/include/header.jsp" />
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<jsp:include page="/WEB-INF/views/include/header.jsp" />
 
 <div class="container mt-4" style="min-height: 60vh;">
     <h2 class="mb-4 fw-bold">Giỏ hàng của bạn</h2>
-    
+
     <c:choose>
         <c:when test="${empty cartItems}">
             <div class="alert alert-warning text-center">
@@ -36,7 +36,9 @@ a<%--
                         <tr>
                             <td><img src="${item.product.imageUrl}" width="70" alt="${item.product.name}"></td>
                             <td class="text-start fw-bold">${item.product.name}</td>
-                            <td class="text-danger">$${item.product.price}</td>
+                            <td class="align-middle fw-bold text-danger">
+                                <fmt:formatNumber value="${item.product.displayPrice}" pattern="#,###"/>₫
+                            </td>
                             <td>
                                 <form action="${pageContext.request.contextPath}/cart" method="post" class="d-flex justify-content-center">
                                     <input type="hidden" name="action" value="update">
@@ -45,19 +47,24 @@ a<%--
                                     <button type="submit" class="btn btn-sm btn-outline-secondary ms-1">Cập nhật</button>
                                 </form>
                             </td>
-                            <td class="text-danger fw-bold">$${item.product.price * item.quantity}</td>
+                            <td class="align-middle fw-bold text-danger">
+                                <fmt:formatNumber value="${item.product.displayPrice * item.quantity}" pattern="#,###"/>₫
+                            </td>
                             <td>
                                 <a href="${pageContext.request.contextPath}/cart?action=remove&id=${item.product.id}" class="btn btn-sm btn-outline-danger">Xóa</a>
                             </td>
                         </tr>
-                        <c:set var="totalPrice" value="${totalPrice + (item.product.price * item.quantity)}" />
+                        <c:set var="totalPrice" value="${totalPrice + (item.product.price * item.quantity)}" />₫
                     </c:forEach>
                 </tbody>
             </table>
-            
+
             <div class="d-flex justify-content-between align-items-center mt-4 p-3 bg-light border rounded">
-                <h4 class="mb-0">Tổng thanh toán: <span class="text-danger fw-bold fs-3">$${totalPrice}</span></h4>
-                
+                <h4 class="mb-0 fw-bold">Tổng thanh toán: 
+                    <span class="text-danger">
+                        <fmt:formatNumber value="${totalPrice}" pattern="#,###"/>₫
+                    </span>
+                </h4>
                 <form action="${pageContext.request.contextPath}/checkout" method="post">
                     <button type="submit" class="btn btn-success btn-lg fw-bold px-5">THANH TOÁN</button>
                 </form>
@@ -66,4 +73,4 @@ a<%--
     </c:choose>
 </div>
 
-<jsp:include page="/WEB-INF/include/footer.jsp" />
+<jsp:include page="/WEB-INF/views/include/footer.jsp" />

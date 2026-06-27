@@ -31,7 +31,7 @@ public class DetailServlet extends HttpServlet {
             
             if (product != null) {
                 request.setAttribute("product", product);
-                request.getRequestDispatcher("/WEB-INF/detail.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/views/client/product/detail.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/home");
             }

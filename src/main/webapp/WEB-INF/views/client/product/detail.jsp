@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<jsp:include page="/WEB-INF/include/header.jsp" />
+<jsp:include page="/WEB-INF/views/include/header.jsp" />
 
 <div class="container mt-5 mb-5">
     <div class="row">
@@ -41,7 +41,7 @@
     </div>
 </div>
 
-<jsp:include page="/WEB-INF/include/footer.jsp" />
+<jsp:include page="/WEB-INF/views/include/footer.jsp" />
 
 ### 2. File `checkout.jsp` (Trang thông tin giao hàng)
 Trang này chỉ hiện ra khi `CheckoutServlet` xác nhận user đã đăng nhập. Nếu chưa đăng nhập, Servlet sẽ điều hướng thẳng về `login.jsp` kèm thông báo lỗi.
@@ -83,4 +83,4 @@ Trang này chỉ hiện ra khi `CheckoutServlet` xác nhận user đã đăng nh
     </div>
 </div>
 
-<jsp:include page="/WEB-INF/include/footer.jsp" />
+<jsp:include page="/WEB-INF/views/include/include/footer.jsp" />

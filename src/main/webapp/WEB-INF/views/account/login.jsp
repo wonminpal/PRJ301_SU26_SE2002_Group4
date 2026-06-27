@@ -5,8 +5,7 @@
 --%>
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<jsp:include page="/WEB-INF/include/header.jsp" />
-
+<jsp:include page="/WEB-INF/views/include/header.jsp" />
 <div class="container my-5" style="min-height: 65vh;">
     <div class="row justify-content-center">
         <div class="col-md-5">
@@ -47,4 +46,4 @@
     </div>
 </div>
 
-<jsp:include page="/WEB-INF/include/footer.jsp" />
+<jsp:include page="/WEB-INF/views/include/footer.jsp" />

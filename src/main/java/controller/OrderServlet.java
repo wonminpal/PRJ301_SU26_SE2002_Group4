@@ -25,7 +25,7 @@ public class OrderServlet extends HttpServlet {
 
         OrderDAO orderDAO = new OrderDAO();
         request.setAttribute("orderList", orderDAO.getOrdersByUserId(user.getId()));
-        request.getRequestDispatcher("/WEB-INF/orderHistory.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/client/order/orderHistory.jsp").forward(request, response);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class OrderServlet extends HttpServlet {
             double totalPrice = cartItems.stream().mapToDouble(i -> i.getProduct().getPrice() * i.getQuantity()).sum();
             request.setAttribute("cartItems", cartItems);
             request.setAttribute("totalPrice", totalPrice);
-            request.getRequestDispatcher("/WEB-INF/checkout.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/client/order/checkout.jsp").forward(request, response);
         } else if (path.equals("/order")) {
             // Xử lý đặt hàng tương tự, nhớ truyền user.getId() hoặc null
             // ... (Code đặt hàng của Phúc)

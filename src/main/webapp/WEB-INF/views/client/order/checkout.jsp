@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<jsp:include page="/WEB-INF/include/header.jsp" />
-
+<jsp:include page="/WEB-INF/views/include/header.jsp" />
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <div class="container mt-4 mb-5" style="min-height: 65vh;">
     <h2 class="mb-4 fw-bold text-center text-uppercase text-primary">Trang Chủ Thanh Toán</h2>
 
@@ -60,24 +60,32 @@
                             </tr>
                         </thead>
                         <tbody>
-                        <c:forEach items="${cartItems}" var="item">
-                            <tr>
-                                <td class="text-start">
-                                    <img src="${item.product.imageUrl}" width="40" class="me-2 rounded" alt="${item.product.name}">
-                                    <span class="fw-bold text-truncate" style="max-width: 200px; display: inline-block;">${item.product.name}</span>
-                                </td>
-                                <td>$${item.product.price}</td>
-                                <td class="fw-bold">x${item.quantity}</td>
-                                <td class="text-danger fw-bold">$${item.product.price * item.quantity}</td>
-                            </tr>
-                        </c:forEach>
+                            <c:forEach items="${cartItems}" var="item">
+                                <tr>
+                                    <td class="text-start">
+                                        <img src="${item.product.imageUrl}" width="40" class="me-2 rounded" alt="${item.product.name}">
+                                        <span class="fw-bold text-truncate" style="max-width: 200px; display: inline-block;">${item.product.name}</span>
+                                    </td>
+                                    <td class="align-middle fw-bold text-danger">
+                                        <fmt:formatNumber value="${item.product.displayPrice}" pattern="#,###"/>₫
+                                    </td>
+
+
+                                    <td class="fw-bold">x${item.quantity}</td>
+                                    <td class="align-middle fw-bold text-danger">
+                                        <fmt:formatNumber value="${item.product.displayPrice * item.quantity}" pattern="#,###"/>₫
+                                    </td>
+                                </tr>
+                            </c:forEach>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="p-3 bg-light border rounded mt-3 text-end">
                     <h4 class="mb-0 fw-bold">Tổng tiền thanh toán: 
-                        <span class="text-danger fs-3">$${totalPrice}</span>
+                        <span class="text-danger">
+                            <fmt:formatNumber value="${totalPrice}" pattern="#,###"/>₫
+                        </span>
                     </h4>
                 </div>
             </div>
@@ -85,4 +93,4 @@
     </div>
 </div>
 
-<jsp:include page="/WEB-INF/include/footer.jsp" />
+<jsp:include page="/WEB-INF/views/include/footer.jsp" />

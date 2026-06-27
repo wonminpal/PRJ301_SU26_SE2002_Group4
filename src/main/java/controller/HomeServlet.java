@@ -56,7 +56,7 @@ public class HomeServlet extends HttpServlet {
         request.setAttribute("currentPage", page);
         request.setAttribute("keyword", keyword); // Để in lại chữ đã gõ vào ô tìm kiếm
 
-        request.getRequestDispatcher("/WEB-INF/home.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/client/home.jsp").forward(request, response);
     }
 
     @Override

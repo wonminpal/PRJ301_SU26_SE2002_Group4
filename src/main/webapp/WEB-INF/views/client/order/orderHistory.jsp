@@ -1,8 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fmt" uri="jakarta.text.fmt" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-<jsp:include page="/WEB-INF/include/header.jsp" />
+<jsp:include page="/WEB-INF/views/include/header.jsp" />
 
 <div class="container mt-4" style="min-height: 65vh;">
     <h2 class="mb-4 fw-bold"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đơn hàng của bạn</h2>
@@ -56,4 +56,4 @@
     </c:choose>
 </div>
 
-<jsp:include page="/WEB-INF/include/footer.jsp" />
+<jsp:include page="/WEB-INF/views/include/footer.jsp" />

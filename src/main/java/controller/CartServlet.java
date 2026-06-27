@@ -13,17 +13,21 @@ import java.util.List;
 public class CartServlet extends HttpServlet {
 
     private String getGuestToken(HttpServletRequest request, HttpServletResponse response) {
-        if (request.getCookies() != null) {
-            for (Cookie c : request.getCookies()) {
-                if (c.getName().equals("guest_token")) return c.getValue();
-            }
+    if (request.getCookies() != null) {
+        for (Cookie c : request.getCookies()) {
+            if (c.getName().equals("guest_token")) return c.getValue();
         }
-        String token = java.util.UUID.randomUUID().toString();
-        Cookie cookie = new Cookie("guest_token", token);
-        cookie.setMaxAge(60 * 60 * 24 * 30);
-        response.addCookie(cookie);
-        return token;
     }
+    String token = java.util.UUID.randomUUID().toString();
+    Cookie cookie = new Cookie("guest_token", token);
+    cookie.setMaxAge(60 * 60 * 24 * 30);
+    
+    // THÊM DÒNG NÀY ĐỂ TRÌNH DUYỆT LƯU ĐÚNG COOKIE CHO TOÀN BỘ WEBSITE
+    cookie.setPath("/"); 
+    
+    response.addCookie(cookie);
+    return token;
+}
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -38,7 +42,7 @@ public class CartServlet extends HttpServlet {
         if (action.equals("view")) {
             List<CartItem> cartItems = cartDAO.getCartItems(userId, guestToken);
             request.setAttribute("cartItems", cartItems);
-            request.getRequestDispatcher("/WEB-INF/cart.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/client/cart/cart.jsp").forward(request, response);
         } else if (action.equals("remove")) {
             int productId = Integer.parseInt(request.getParameter("id"));
             String variant = request.getParameter("variant");

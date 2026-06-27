@@ -85,9 +85,9 @@ public class AuthServlet extends HttpServlet {
             }
             response.sendRedirect("auth?action=loginForm");
         } else if ("registerForm".equals(action)) {
-            request.getRequestDispatcher("/WEB-INF/account/register.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/account/register.jsp").forward(request, response);
         } else {
-            request.getRequestDispatcher("/WEB-INF/account/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/account/login.jsp").forward(request, response);
         }
     }
 
