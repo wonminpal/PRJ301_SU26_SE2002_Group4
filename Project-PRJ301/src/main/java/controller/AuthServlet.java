@@ -130,7 +130,7 @@ public class AuthServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/home");
             } else {
                 request.setAttribute("errorMessage", "Email hoặc mật khẩu không chính xác!");
-                request.getRequestDispatcher("/views/account/login.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/views/account/login.jsp").forward(request, response);
             }
 
             // SỬA Ở ĐÂY: Bắt cả 'register' và 'signup'
@@ -143,7 +143,7 @@ public class AuthServlet extends HttpServlet {
                 response.sendRedirect("auth?action=signinForm&success=true");
             } else {
                 request.setAttribute("errorMessage", "Email đã tồn tại trong hệ thống!");
-                request.getRequestDispatcher("/views/account/register.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/views/account/register.jsp").forward(request, response);
             }
         }
     }
