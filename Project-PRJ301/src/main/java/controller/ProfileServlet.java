@@ -5,14 +5,14 @@
 package controller;
 
 import dao.UserDAO;
-import model.User;
-import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import model.User;
 
 /**
  *
@@ -40,7 +40,7 @@ public class ProfileServlet extends HttpServlet {
         // Cập nhật lại thông tin mới nhất từ DB
         User currentUser = userDao.getUserByEmail(sessionUser.getEmail());
         request.setAttribute("user", currentUser);
-        request.getRequestDispatcher("/WEB-INF/account/profile.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/account/profile.jsp").forward(request, response);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -82,6 +82,6 @@ public class ProfileServlet extends HttpServlet {
 
         // Nạp lại dữ liệu hiển thị
         request.setAttribute("user", userDao.getUserByEmail(email));
-        request.getRequestDispatcher("/WEB-INF/account/profile.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/account/profile.jsp").forward(request, response);
     }
 }
