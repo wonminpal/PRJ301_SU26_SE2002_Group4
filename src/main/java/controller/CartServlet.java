@@ -1,89 +1,70 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.CartDAO;
 import model.CartItem;
+import model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-
+import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.List;
 
-/**
- *
- * @author ADMIN
- */
-
-
-   @WebServlet(name = "CartServlet", urlPatterns = {"/cart"})
+@WebServlet(name = "CartServlet", urlPatterns = {"/cart"})
 public class CartServlet extends HttpServlet {
-    
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "view"; // Mặc định là xem giỏ hàng
+
+    private String getGuestToken(HttpServletRequest request, HttpServletResponse response) {
+        if (request.getCookies() != null) {
+            for (Cookie c : request.getCookies()) {
+                if (c.getName().equals("guest_token")) return c.getValue();
+            }
         }
+        String token = java.util.UUID.randomUUID().toString();
+        Cookie cookie = new Cookie("guest_token", token);
+        cookie.setMaxAge(60 * 60 * 24 * 30);
+        response.addCookie(cookie);
+        return token;
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("account");
+        Integer userId = (user != null) ? user.getId() : null;
+        String guestToken = (user == null) ? getGuestToken(request, response) : null;
 
         CartDAO cartDAO = new CartDAO();
-        
-        // GIẢ LẬP: Mặc định userId = 1 (Tài khoản mẫu)
-        // Sau này bạn Phát làm Login xong, em đổi thành code lấy từ Session nhé:
-        // User user = (User) request.getSession().getAttribute("account");
-        // int userId = user.getId();
-        int userId = 1; 
+        String action = request.getParameter("action") == null ? "view" : request.getParameter("action");
 
         if (action.equals("view")) {
-            // Lấy danh sách sản phẩm và đẩy sang cart.jsp tính tiền
-            List<CartItem> cartItems = cartDAO.getCartItemsByUserId(userId);
+            List<CartItem> cartItems = cartDAO.getCartItems(userId, guestToken);
             request.setAttribute("cartItems", cartItems);
             request.getRequestDispatcher("/WEB-INF/cart.jsp").forward(request, response);
-            
         } else if (action.equals("remove")) {
-            // Lấy ID sản phẩm và gọi hàm xóa
             int productId = Integer.parseInt(request.getParameter("id"));
-            cartDAO.removeItem(userId, productId);
-            
-            // Xóa xong thì load lại trang giỏ hàng
+            String variant = request.getParameter("variant");
+            cartDAO.removeItem(userId, guestToken, productId, variant);
             response.sendRedirect(request.getContextPath() + "/cart");
         }
     }
 
-    // Hàm xử lý việc THÊM và CẬP NHẬT SỐ LƯỢNG (Form submit)
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        String action = request.getParameter("action");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("account");
+        Integer userId = (user != null) ? user.getId() : null;
+        String guestToken = (user == null) ? getGuestToken(request, response) : null;
+
         CartDAO cartDAO = new CartDAO();
-        int userId = 1; // Giả lập user 1
+        String action = request.getParameter("action");
+        int productId = Integer.parseInt(request.getParameter("id"));
+        String variant = request.getParameter("variant");
 
         if (action.equals("add")) {
-            int productId = Integer.parseInt(request.getParameter("id"));
-            int quantity = 1; // Bấm nút "Thêm vào giỏ" ngoài Home thì mặc định là 1
-            
-            cartDAO.addToCart(userId, productId, quantity);
+            cartDAO.addToCart(userId, guestToken, productId, 1, variant);
             response.sendRedirect(request.getContextPath() + "/cart");
-            
         } else if (action.equals("update")) {
-            int productId = Integer.parseInt(request.getParameter("id"));
             int quantity = Integer.parseInt(request.getParameter("quantity"));
-            
-            if (quantity > 0) {
-                cartDAO.updateQuantity(userId, productId, quantity);
-            } else {
-                // Nếu khách cố tình nhập số lượng = 0 thì tự động xóa món đó
-                cartDAO.removeItem(userId, productId);
-            }
+            cartDAO.updateQuantity(userId, guestToken, productId, variant, quantity);
             response.sendRedirect(request.getContextPath() + "/cart");
         }
     }

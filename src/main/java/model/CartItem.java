@@ -4,51 +4,29 @@
  */
 package model;
 
-/**
- *
- * @author ADMIN
- */
 public class CartItem {
     private int id;
-    private int cartId;
     private int productId;
     private int quantity;
-    // Thêm object Product để mang dữ liệu Tên, Giá, Ảnh ra ngoài view JSP
+    private String variant;
     private Product product;
 
     public CartItem() {
     }
 
-    public CartItem(int id, int cartId, int productId, int quantity, Product product) {
-        this.id = id;
-        this.cartId = cartId;
-        this.productId = productId;
-        this.quantity = quantity;
-        this.product = product;
-    }
 
+    public CartItem(Product product, int quantity, String variant) {
+    this.product = product;
+    this.quantity = quantity;
+    this.variant = variant;
+}
+    
     public int getId() {
-        return id;
-    }
+    return id;
+}
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public int getCartId() {
-        return cartId;
-    }
-
-    public void setCartId(int cartId) {
-        this.cartId = cartId;
-    }
-
-    public int getProductId() {
-        return productId;
-    }
-
-    public void setProductId(int productId) {
-        this.productId = productId;
     }
 
     public int getQuantity() {
@@ -59,12 +37,24 @@ public class CartItem {
         this.quantity = quantity;
     }
 
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
+    }
+
     public Product getProduct() {
         return product;
     }
 
+    // Getters & Setters
     public void setProduct(Product product) {
         this.product = product;
     }
-    
+
+    public int getProductId() {
+        return this.product != null ? this.product.getId() : this.productId;
+    }
 }

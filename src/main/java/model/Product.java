@@ -4,36 +4,34 @@
  */
 package model;
 
-import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-/**
- *
- * @author ADMIN
- */
 public class Product {
+
     private int id;
     private int categoryId;
     private String name;
     private String description;
-    private double price;
-    private String imageUrl;
-    private int stockQuantity;
+    private String brand;
+    private String slug;
+    private int status;
     private Date createdAt;
+
+    private double displayPrice;
+    private String displayImageUrl;
+
+    private Category category;
+    private List<ProductVariant> variants = new ArrayList<>();
+    private List<String> images = new ArrayList<>();
 
     public Product() {
     }
 
-    public Product(int id, int categoryId, String name, String description, double price, String imageUrl, int stockQuantity, Date createdAt) {
-        this.id = id;
-        this.categoryId = categoryId;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.imageUrl = imageUrl;
-        this.stockQuantity = stockQuantity;
-        this.createdAt = createdAt;
-    }
-
+    // ==========================================
+    // TOÀN BỘ GETTER VÀ SETTER
+    // ==========================================
     public int getId() {
         return id;
     }
@@ -66,28 +64,28 @@ public class Product {
         this.description = description;
     }
 
-    public double getPrice() {
-        return price;
+    public String getBrand() {
+        return brand;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getSlug() {
+        return slug;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 
-    public int getStockQuantity() {
-        return stockQuantity;
+    public int getStatus() {
+        return status;
     }
 
-    public void setStockQuantity(int stockQuantity) {
-        this.stockQuantity = stockQuantity;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public Date getCreatedAt() {
@@ -97,5 +95,58 @@ public class Product {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
-    
+
+    public double getDisplayPrice() {
+        return displayPrice;
+    }
+
+    public void setDisplayPrice(double displayPrice) {
+        this.displayPrice = displayPrice;
+    }
+
+    public String getDisplayImageUrl() {
+        return displayImageUrl;
+    }
+
+    public void setDisplayImageUrl(String displayImageUrl) {
+        this.displayImageUrl = displayImageUrl;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public List<ProductVariant> getVariants() {
+        return variants;
+    }
+
+    public void setVariants(List<ProductVariant> variants) {
+        this.variants = variants;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
+
+    public double getPrice() {
+        return this.displayPrice; // Trả về giá của biến thể rẻ nhất (displayPrice)
+    }
+
+    public int getProductId() {
+        return this.id; // Vì trong class của Nhân, ID chính là Product ID
+    }
+        // Thêm các hàm này vào cuối class Product để code cũ không lỗi
+
+    public String getImageUrl() {
+        return this.displayImageUrl;
+    }
+
 }

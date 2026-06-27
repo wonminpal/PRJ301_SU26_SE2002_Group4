@@ -1,144 +1,119 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
 
 import db.DBContext;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import model.CartItem;
-import model.Product;
+import java.sql.*;
+import java.util.*;
+import model.*;
 
 /**
- *
  * @author ADMIN
  */
 public class CartDAO extends DBContext {
-    public int getOrCreateCartId(int userId) {
-    int cartId = -1;
-    try {
-        // 1. Kiểm tra xem user này đã có giỏ hàng chưa
-        String checkSql = "SELECT id FROM Carts WHERE user_id = ?";
-        PreparedStatement ps = getConnection().prepareStatement(checkSql);
-        ps.setInt(1, userId);
-        ResultSet rs = ps.executeQuery();
-        
-        if (rs.next()) {
-            cartId = rs.getInt("id");
-        } else {
-            // 2. Nếu chưa có, tạo giỏ hàng mới cho user này
-            String insertSql = "INSERT INTO Carts (user_id) VALUES (?)";
+
+    // --- 1. Hàm tìm hoặc tạo giỏ hàng (Dùng cho cả User và Guest) ---
+    public int getOrCreateCartId(Integer userId, String guestToken) {
+        try {
+            String sql = (userId != null) ? "SELECT id FROM Carts WHERE user_id = ?" : "SELECT id FROM Carts WHERE guest_token = ?";
+            PreparedStatement ps = getConnection().prepareStatement(sql);
+            if (userId != null) ps.setInt(1, userId); else ps.setString(1, guestToken);
+            
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt("id");
+
+            // Nếu chưa có thì tạo mới
+            String insertSql = (userId != null) ? "INSERT INTO Carts (user_id) VALUES (?)" : "INSERT INTO Carts (guest_token) VALUES (?)";
             PreparedStatement psInsert = getConnection().prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
-            psInsert.setInt(1, userId);
+            if (userId != null) psInsert.setInt(1, userId); else psInsert.setString(1, guestToken);
             psInsert.executeUpdate();
             
             ResultSet rsGen = psInsert.getGeneratedKeys();
-            if (rsGen.next()) {
-                cartId = rsGen.getInt(1);
-            }
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
+            if (rsGen.next()) return rsGen.getInt(1);
+        } catch (SQLException e) { e.printStackTrace(); }
+        return -1;
     }
-    return cartId;
-}
-    public void addToCart(int userId, int productId, int quantity) {
-    int cartId = getOrCreateCartId(userId);
     
-    try {
-        // 1. Kiểm tra sản phẩm đã có trong giỏ của user này chưa
-        String checkItemSql = "SELECT id, quantity FROM Cart_Items WHERE cart_id = ? AND product_id = ?";
-        PreparedStatement psCheck = getConnection().prepareStatement(checkItemSql);
-        psCheck.setInt(1, cartId);
-        psCheck.setInt(2, productId);
-        ResultSet rs = psCheck.executeQuery();
-        
-        if (rs.next()) {
-            // 2A. Nếu có rồi -> Cập nhật tăng số lượng
-            int currentQty = rs.getInt("quantity");
-            String updateSql = "UPDATE Cart_Items SET quantity = ? WHERE cart_id = ? AND product_id = ?";
-            PreparedStatement psUpdate = getConnection().prepareStatement(updateSql);
-            psUpdate.setInt(1, currentQty + quantity);
-            psUpdate.setInt(2, cartId);
-            psUpdate.setInt(3, productId);
-            psUpdate.executeUpdate();
-        } else {
-            // 2B. Nếu chưa có -> Thêm dòng mới
-            String insertSql = "INSERT INTO Cart_Items (cart_id, product_id, quantity) VALUES (?, ?, ?)";
-            PreparedStatement psInsert = getConnection().prepareStatement(insertSql);
-            psInsert.setInt(1, cartId);
-            psInsert.setInt(2, productId);
-            psInsert.setInt(3, quantity);
-            psInsert.executeUpdate();
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
+    // --- 2. Hàm thêm sản phẩm vào giỏ ---
+    public void addToCart(Integer userId, String guestToken, int productId, int quantity, String variant) {
+        int cartId = getOrCreateCartId(userId, guestToken);
+        try {
+            String checkItemSql = "SELECT id, quantity FROM Cart_Items WHERE cart_id = ? AND product_id = ? AND variant = ?";
+            PreparedStatement psCheck = getConnection().prepareStatement(checkItemSql);
+            psCheck.setInt(1, cartId);
+            psCheck.setInt(2, productId);
+            psCheck.setString(3, variant);
+            ResultSet rs = psCheck.executeQuery();
+
+            if (rs.next()) {
+                int currentQty = rs.getInt("quantity");
+                String updateSql = "UPDATE Cart_Items SET quantity = ? WHERE cart_id = ? AND product_id = ? AND variant = ?";
+                PreparedStatement psUpdate = getConnection().prepareStatement(updateSql);
+                psUpdate.setInt(1, currentQty + quantity);
+                psUpdate.setInt(2, cartId);
+                psUpdate.setInt(3, productId);
+                psUpdate.setString(4, variant);
+                psUpdate.executeUpdate();
+            } else {
+                String insertSql = "INSERT INTO Cart_Items (cart_id, product_id, quantity, variant) VALUES (?, ?, ?, ?)";
+                PreparedStatement psInsert = getConnection().prepareStatement(insertSql);
+                psInsert.setInt(1, cartId);
+                psInsert.setInt(2, productId);
+                psInsert.setInt(3, quantity);
+                psInsert.setString(4, variant);
+                psInsert.executeUpdate();
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
     }
-}
-    public List<CartItem> getCartItemsByUserId(int userId) {
-    List<CartItem> list = new ArrayList<>();
-    // JOIN 3 bảng: Carts, Cart_Items, Products
-    String sql = "SELECT ci.id, ci.quantity, p.id AS p_id, p.name, p.price, p.image_url " +
-                 "FROM Cart_Items ci " +
-                 "JOIN Carts c ON ci.cart_id = c.id " +
-                 "JOIN Products p ON ci.product_id = p.id " +
-                 "WHERE c.user_id = ?";
-                 
-    try {
-        PreparedStatement ps = getConnection().prepareStatement(sql);
-        ps.setInt(1, userId);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            CartItem item = new CartItem();
-            item.setId(rs.getInt("id"));
-            item.setQuantity(rs.getInt("quantity"));
-            
-            // Đổ dữ liệu vào object Product lồng bên trong
-            Product p = new Product();
-            p.setId(rs.getInt("p_id"));
-            p.setName(rs.getString("name"));
-            p.setPrice(rs.getDouble("price"));
-            p.setImageUrl(rs.getString("image_url"));
-            
-            item.setProduct(p);
-            list.add(item);
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
+
+    // --- 3. Hàm lấy danh sách sản phẩm trong giỏ ---
+    public List<CartItem> getCartItems(Integer userId, String guestToken) {
+        int cartId = getOrCreateCartId(userId, guestToken);
+        List<CartItem> list = new ArrayList<>();
+        String sql = "SELECT ci.*, p.name, p.price, p.image_url FROM Cart_Items ci JOIN Products p ON ci.product_id = p.id WHERE ci.cart_id = ?";
+        try {
+            PreparedStatement ps = getConnection().prepareStatement(sql);
+            ps.setInt(1, cartId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                // Tạo đối tượng Product từ dữ liệu DB
+                Product p = new Product();
+                p.setId(rs.getInt("product_id"));
+                p.setName(rs.getString("name"));
+                p.setDisplayPrice(rs.getDouble("price"));
+                p.setDisplayImageUrl(rs.getString("image_url"));
+                
+                // Tạo CartItem
+                CartItem item = new CartItem(p, rs.getInt("quantity"), rs.getString("variant"));
+                item.setId(rs.getInt("id"));
+                list.add(item);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
     }
-    return list;
-}
-    // Hàm Cập nhật số lượng sản phẩm trong giỏ
-    public void updateQuantity(int userId, int productId, int newQuantity) {
-        int cartId = getOrCreateCartId(userId);
-        String sql = "UPDATE Cart_Items SET quantity = ? WHERE cart_id = ? AND product_id = ?";
+
+    // --- 4. Hàm cập nhật số lượng ---
+    public void updateQuantity(Integer userId, String guestToken, int productId, String variant, int newQuantity) {
+        int cartId = getOrCreateCartId(userId, guestToken);
+        String sql = "UPDATE Cart_Items SET quantity = ? WHERE cart_id = ? AND product_id = ? AND variant = ?";
         try {
             PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setInt(1, newQuantity);
             ps.setInt(2, cartId);
             ps.setInt(3, productId);
+            ps.setString(4, variant);
             ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // Hàm Xóa sản phẩm khỏi giỏ hàng
-    public void removeItem(int userId, int productId) {
-        int cartId = getOrCreateCartId(userId);
-        String sql = "DELETE FROM Cart_Items WHERE cart_id = ? AND product_id = ?";
+    // --- 5. Hàm xóa sản phẩm ---
+    public void removeItem(Integer userId, String guestToken, int productId, String variant) {
+        int cartId = getOrCreateCartId(userId, guestToken);
+        String sql = "DELETE FROM Cart_Items WHERE cart_id = ? AND product_id = ? AND variant = ?";
         try {
             PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setInt(1, cartId);
             ps.setInt(2, productId);
+            ps.setString(3, variant);
             ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 }

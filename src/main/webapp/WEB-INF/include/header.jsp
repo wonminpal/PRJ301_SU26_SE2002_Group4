@@ -43,9 +43,28 @@
                         <li class="nav-item">
                             <a class="nav-link" href="${pageContext.request.contextPath}/order">Lịch sử đơn</a>
                         </li>
-                        <li class="nav-item ms-2">
-                            <a class="btn btn-outline-light btn-sm mt-1" href="${pageContext.request.contextPath}/auth?action=signin">Đăng nhập</a>
-                        </li>
+
+                        <c:choose>
+                            <%-- Nếu ĐÃ ĐĂNG NHẬP (Session 'account' có tồn tại) --%>
+                            <c:when test="${not empty sessionScope.account}">
+                                <li class="nav-item ms-2">
+                                    <a class="nav-link text-info fw-bold" href="${pageContext.request.contextPath}/profile">
+                                        👤 Chào, ${sessionScope.account.fullName}
+                                    </a>
+                                </li>
+                                <%-- Nút Đăng xuất --%>
+                                <li class="nav-item ms-2">
+                                    <a class="btn btn-danger btn-sm mt-1 fw-bold" href="${pageContext.request.contextPath}/auth?action=logout">Đăng xuất</a>
+                                </li>
+                            </c:when>
+
+                            <%-- Nếu CHƯA ĐĂNG NHẬP --%>
+                            <c:otherwise>
+                                <li class="nav-item ms-2">
+                                    <a class="btn btn-outline-light btn-sm mt-1 fw-bold" href="${pageContext.request.contextPath}/auth?action=signinForm">Đăng nhập</a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
                     </ul>
                 </div>
             </div>
