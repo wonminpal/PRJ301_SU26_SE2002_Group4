@@ -4,25 +4,24 @@
  */
 package controller;
 
-import dao.UserDAO;
 import dao.CartDAO;
-import model.User;
-import model.CartItem;
-import java.io.IOException;
-import java.util.Map;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
+import dao.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Map;
+import model.CartItem;
+import model.User;
 
 /**
  *
@@ -82,9 +81,9 @@ public class AuthServlet extends HttpServlet {
             }
             response.sendRedirect("auth?action=loginForm");
         } else if ("registerForm".equals(action)) {
-            request.getRequestDispatcher("/WEB-INF/account/register.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/account/register.jsp").forward(request, response);
         } else {
-            request.getRequestDispatcher("/WEB-INF/account/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/account/login.jsp").forward(request, response);
         }
     }
 

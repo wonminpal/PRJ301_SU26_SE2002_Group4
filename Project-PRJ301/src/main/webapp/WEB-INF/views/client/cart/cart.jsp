@@ -7,7 +7,7 @@ a<%--
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
-<jsp:include page="/WEB-INF/include/header.jsp" />
+<jsp:include page="/WEB-INF/view/include/header.jsp" />
 
 <div class="container mt-4" style="min-height: 60vh;">
     <h2 class="mb-4 fw-bold">Giỏ hàng của bạn</h2>
@@ -66,4 +66,4 @@ a<%--
     </c:choose>
 </div>
 
-<jsp:include page="/WEB-INF/include/footer.jsp" />
+<jsp:include page="/WEB-INF/view/include/footer.jsp" />
