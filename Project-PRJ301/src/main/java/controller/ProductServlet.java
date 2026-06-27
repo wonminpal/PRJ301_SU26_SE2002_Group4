@@ -50,7 +50,7 @@ public class ProductServlet extends HttpServlet {
         Product product = dao.getProductBySlug(slug);
 
         if (product == null) {
-            request.getRequestDispatcher("/view/error/404.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/views/error/404.jsp").forward(request, response);
             return;
         }
 
@@ -59,7 +59,7 @@ public class ProductServlet extends HttpServlet {
         request.setAttribute("product", product);
         request.setAttribute("relatedProducts", relatedProducts);
 
-        request.getRequestDispatcher("WEB-INF/views/product/detail.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/product/detail.jsp").forward(request, response);
     }
 
     @Override

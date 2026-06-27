@@ -28,7 +28,7 @@
             </div>
         </c:forEach>
         
-    </div>
+  
 </div>
 
     <c:if test="${totalPages > 1}">

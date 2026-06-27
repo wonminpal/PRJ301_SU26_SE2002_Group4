@@ -42,7 +42,7 @@ public class CartServlet extends HttpServlet {
             // Lấy danh sách sản phẩm và đẩy sang cart.jsp tính tiền
             List<CartItem> cartItems = cartDAO.getCartItemsByUserId(userId);
             request.setAttribute("cartItems", cartItems);
-            request.getRequestDispatcher("/WEB-INF/views//client/cart/cart.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/client/cart/cart.jsp").forward(request, response);
 
         } else if (action.equals("remove")) {
             // Lấy ID sản phẩm và gọi hàm xóa
