@@ -1,0 +1,5 @@
+.low-stock, .low-stock td {
+    color: #dc3545 !important;
+    background-color: #fff5f5 !important;
+    font-weight: bold;
+}
