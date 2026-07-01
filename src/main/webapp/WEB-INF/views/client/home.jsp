@@ -11,17 +11,22 @@
         <c:forEach items="${productList}" var="p">
             <div class="col-md-3 mb-4">
                 <div class="card h-100 shadow-sm border-0">
-                    <img src="${p.displayImageUrl}" class="card-img-top p-3" alt="${p.name}" style="height: 250px; object-fit: contain;">
-
-
+                    
+                    <a href="${pageContext.request.contextPath}/detail?slug=${p.slug}">
+                        <img src="${p.displayImageUrl}" class="card-img-top p-3" alt="${p.name}" style="height: 250px; object-fit: contain;">
+                    </a>
 
                     <div class="card-body d-flex flex-column text-center">
-                        <h6 class="card-title text-truncate">${p.name}</h6>
+                        
+                        <a href="${pageContext.request.contextPath}/detail?slug=${p.slug}" class="text-decoration-none text-dark">
+                            <h6 class="card-title text-truncate">${p.name}</h6>
+                        </a>
+                        
                         <p class="card-text text-danger fw-bold mt-auto">
                             <fmt:formatNumber value="${p.displayPrice}" pattern="#,###"/>₫
                         </p>
                     </div>
-
+                    <%--
                     <div class="card-footer bg-white border-0 pb-3">
                         <form action="${pageContext.request.contextPath}/cart" method="post">
                             <input type="hidden" name="action" value="add">
@@ -29,10 +34,10 @@
                             <button type="submit" class="btn btn-primary w-100 fw-bold">Thêm vào giỏ</button>
                         </form>
                     </div>
+                    --%>
                 </div>
             </div>
         </c:forEach>
-
     </div>
 </div>
 

@@ -76,13 +76,14 @@ public class ProductDAO extends DBContext {
         String sqlImages = "SELECT image_url FROM Product_Images WHERE product_id = ? ORDER BY is_thumbnail DESC";
 
         try {
-            PreparedStatement statementProduct = this.getConnection().prepareCall(sqlProduct);
+            PreparedStatement statementProduct = this.getConnection().prepareStatement(sqlProduct);
 
             statementProduct.setString(1, slug);
 
             ResultSet rsProduct = statementProduct.executeQuery();
 
-            while (rsProduct.next()) {
+            if (rsProduct.next()) {
+                p = new Product();
                 p.setId(rsProduct.getInt("id"));
                 p.setCategoryId(rsProduct.getInt("category_id"));
                 p.setName(rsProduct.getString("name"));
@@ -97,7 +98,7 @@ public class ProductDAO extends DBContext {
             }
 
             if (p != null) {
-                PreparedStatement statementVariant = this.getConnection().prepareCall(sqlVariant);
+                PreparedStatement statementVariant = this.getConnection().prepareStatement(sqlVariant);
 
                 statementVariant.setInt(1, p.getId());
 
@@ -121,7 +122,7 @@ public class ProductDAO extends DBContext {
 
                 p.setVariants(variants);
 
-                PreparedStatement statementImage = this.getConnection().prepareCall(sqlImages);
+                PreparedStatement statementImage = this.getConnection().prepareStatement(sqlImages);
 
                 statementImage.setInt(1, p.getId());
 
@@ -279,17 +280,15 @@ public class ProductDAO extends DBContext {
         return 0;
     }
 
-
-
     // Hàm lấy danh sách sản phẩm theo từ khóa (phân trang)
     public List<Product> searchProducts(String keyword, int page, int pageSize) {
         List<Product> list = new ArrayList<>();
         // Lưu ý: Dùng alias display_price và display_image để khớp với JSP
-        String sql = "SELECT p.id, p.name, " +
-                     "(SELECT MIN(price) FROM Product_Variants WHERE product_id = p.id) as display_price, " +
-                     "(SELECT TOP 1 image_url FROM Product_Images WHERE product_id = p.id AND is_thumbnail = 1) as display_image " +
-                     "FROM Products p WHERE p.name LIKE ? AND p.status = 1 " +
-                     "ORDER BY p.id DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT p.*, "
+                + "(SELECT MIN(price) FROM Product_Variants WHERE product_id = p.id) as display_price, "
+                + "(SELECT TOP 1 image_url FROM Product_Images WHERE product_id = p.id AND is_thumbnail = 1) as display_image "
+                + "FROM Products p WHERE p.name LIKE ? AND p.status = 1 "
+                + "ORDER BY p.id DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
             PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, "%" + keyword + "%");
@@ -299,21 +298,24 @@ public class ProductDAO extends DBContext {
             while (rs.next()) {
                 Product p = new Product();
                 p.setId(rs.getInt("id"));
+                p.setSlug(rs.getString("slug"));
                 p.setName(rs.getString("name"));
                 p.setDisplayPrice(rs.getDouble("display_price"));
                 p.setDisplayImageUrl(rs.getString("display_image"));
                 list.add(p);
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return list;
     }
 
     // Hàm lấy chi tiết sản phẩm theo ID
     public Product getProductById(int id) {
-        String sql = "SELECT p.*, " +
-                     "(SELECT MIN(price) FROM Product_Variants WHERE product_id = p.id) as display_price, " +
-                     "(SELECT TOP 1 image_url FROM Product_Images WHERE product_id = p.id AND is_thumbnail = 1) as display_image " +
-                     "FROM Products p WHERE p.id = ?";
+        String sql = "SELECT p.*, "
+                + "(SELECT MIN(price) FROM Product_Variants WHERE product_id = p.id) as display_price, "
+                + "(SELECT TOP 1 image_url FROM Product_Images WHERE product_id = p.id AND is_thumbnail = 1) as display_image "
+                + "FROM Products p WHERE p.id = ?";
         try {
             PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setInt(1, id);
@@ -327,9 +329,11 @@ public class ProductDAO extends DBContext {
                 p.setDisplayImageUrl(rs.getString("display_image"));
                 return p;
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
-    
+
     // Giữ nguyên các hàm khác của bạn Nhân (getLatestProducts, countSearchProducts...)
 }
