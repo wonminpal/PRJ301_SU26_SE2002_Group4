@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.ProductDAO;
@@ -13,31 +9,22 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import model.Product;
 
-/**
- *
- * @author LENOVO
- */
 @WebServlet(name = "DetailServlet", urlPatterns = {"/detail"})
 public class DetailServlet extends HttpServlet {
-
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            // Đổi từ ID sang Slug
+            // Lấy Slug từ URL thay vì ID (Tối ưu SEO cho dự án Web)
             String slug = request.getParameter("slug");
             ProductDAO dao = new ProductDAO();
 
-            // Dùng hàm nâng cao để lấy cả biến thể và ảnh
             Product product = dao.getProductBySlug(slug);
 
             if (product != null) {
+                // Đẩy dữ liệu Product qua detail.jsp để JSTL render
                 request.setAttribute("product", product);
-                // Giữ nguyên đường dẫn chuẩn của nhóm
                 request.getRequestDispatcher("/WEB-INF/views/client/product/detail.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/home");
@@ -51,5 +38,6 @@ public class DetailServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Bỏ trống vì form thêm giỏ hàng đã trỏ trực tiếp đến CartServlet
     }
 }
