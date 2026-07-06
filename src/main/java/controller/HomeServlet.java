@@ -29,32 +29,40 @@ public class HomeServlet extends HttpServlet {
 
         ProductDAO dao = new ProductDAO();
         String keyword = request.getParameter("keyword");
+        String category = request.getParameter("category"); // LẤY THÊM CATEGORY TỪ URL
 
-        // Nếu không có keyword (vừa vào web), gán bằng chuỗi rỗng để lệnh LIKE '%%' lấy tất cả
         if (keyword == null) {
             keyword = "";
         }
 
         int page = 1;
-        // THẦY CHỈNH LẠI BẰNG 4 ĐỂ EM DỄ TEST PHÂN TRANG NHÉ:
         int pageSize = 8;
 
         if (request.getParameter("page") != null) {
             page = Integer.parseInt(request.getParameter("page"));
         }
 
-        // Luôn luôn đếm và tính số trang (dù có search hay không)
-        int totalProducts = dao.countSearchProducts(keyword);
+        int totalProducts = 0;
+        List<Product> list = null;
+
+        // KIỂM TRA LOGIC: Lọc theo Danh mục hay Tìm kiếm
+        if (category != null && !category.isEmpty()) {
+            // Lấy sản phẩm theo Danh mục
+            totalProducts = dao.countProductsByCategory(category);
+            list = dao.getProductsByCategory(category, page, pageSize);
+        } else {
+            // Lấy sản phẩm theo Keyword (Nếu rỗng thì là lấy tất cả)
+            totalProducts = dao.countSearchProducts(keyword);
+            list = dao.searchProducts(keyword, page, pageSize);
+        }
+
         int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
-
-        // Lấy danh sách sản phẩm theo trang
-        List<Product> list = dao.searchProducts(keyword, page, pageSize);
-
 
         request.setAttribute("productList", list);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("currentPage", page);
-        request.setAttribute("keyword", keyword); // Để in lại chữ đã gõ vào ô tìm kiếm
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("currentCategory", category); // Truyền danh mục hiện tại xuống JSP để làm sáng nút
 
         request.getRequestDispatcher("/WEB-INF/views/client/home.jsp").forward(request, response);
     }
