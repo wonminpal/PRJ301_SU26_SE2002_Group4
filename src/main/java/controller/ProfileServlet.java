@@ -5,14 +5,14 @@
 package controller;
 
 import dao.UserDAO;
-import model.User;
-import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import model.User;
 
 /**
  *
@@ -56,7 +56,7 @@ public class ProfileServlet extends HttpServlet {
         String action = request.getParameter("action");
         String email = sessionUser.getEmail();
 
-        if ("updateInfo".equals(action)) {
+        if ("update".equals(action)) {
             String fullName = request.getParameter("fullName");
             String phone = request.getParameter("phone");
             String address = request.getParameter("address");
@@ -66,7 +66,8 @@ public class ProfileServlet extends HttpServlet {
             } else {
                 request.setAttribute("errorMsg", "Cập nhật thất bại.");
             }
-        } else if ("changePassword".equals(action)) {
+
+        } else if ("updatePassword".equals(action)) {
             String oldPass = request.getParameter("oldPassword");
             String newPass = request.getParameter("newPassword");
             String confirmPass = request.getParameter("confirmPassword");

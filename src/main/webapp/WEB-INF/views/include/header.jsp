@@ -24,11 +24,6 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="${pageContext.request.contextPath}/home">Trang Chủ</a>
-                        </li>
-                    </ul>
                     <form class="d-flex mx-auto" action="${pageContext.request.contextPath}/home" method="get" style="width: 400px;">
                         <input class="form-control me-2" type="search" name="keyword" placeholder="Tìm tên sản phẩm..." value="${keyword}">
                         <button class="btn btn-outline-warning text-dark fw-bold" type="submit">Tìm</button>
