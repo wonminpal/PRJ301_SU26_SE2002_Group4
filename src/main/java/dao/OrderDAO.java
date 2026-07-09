@@ -126,4 +126,19 @@ public class OrderDAO extends DBContext {
         }
         return list;
     }
+    
+    public boolean updateStatus(int orderId, String status) { // Đổi sang String status
+    String query = "UPDATE Orders SET status = ? WHERE id = ?";
+    try (Connection conn = getConnection(); 
+         PreparedStatement ps = conn.prepareStatement(query)) {
+        
+        ps.setString(1, status); // Sử dụng setString thay vì setInt
+        ps.setInt(2, orderId);
+        
+        return ps.executeUpdate() > 0;
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return false;
+}
 }
