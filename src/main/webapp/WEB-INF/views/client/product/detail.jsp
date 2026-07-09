@@ -52,13 +52,17 @@
 
             <form action="${pageContext.request.contextPath}/cart" method="post" class="d-flex align-items-center gap-3">
                 <input type="hidden" name="action" value="add">
-                <input type="hidden" name="productId" value="${product.id}">
 
-                <input type="hidden" name="variantId" id="selected-variant-id" value="">
+                <!-- SỬA "productId" THÀNH "id" ĐỂ KHỚP VỚI CARTSERVLET -->
+                <input type="hidden" name="id" value="${product.id}">
+
+                <!-- Đảm bảo tên biến variant khớp với CartDAO (nếu CartServlet dùng request.getParameter("variant")) -->
+                <input type="hidden" name="variant" id="selected-variant-id" value="">
 
                 <div class="input-group" style="width: 130px;">
                     <span class="input-group-text bg-white">SL</span>
-                    <input type="number" name="quantity" id="order-quantity" class="form-control text-center" value="1" min="1" max="1">
+                    <!-- Nhớ cho phép người dùng chọn số lượng lớn hơn 1 nhé, bỏ max="1" đi -->
+                    <input type="number" name="quantity" id="order-quantity" class="form-control text-center" value="1" min="1">
                 </div>
 
                 <button type="submit" class="btn btn-danger btn-lg px-4 fw-bold shadow-sm" id="btn-add-cart">
@@ -73,16 +77,16 @@
 <script>
     // Cấu trúc danh sách các biến thể sản phẩm
     const variants = [
-        <c:forEach items="${product.variants}" var="v" varStatus="status">
-        {
-            id: ${v.id},
+    <c:forEach items="${product.variants}" var="v" varStatus="status">
+    {
+    id: ${v.id},
             color: "${v.color}",
             capacity: "${v.storageCapacity}",
             price: ${v.price},
             stock: ${v.stockQuantity}
-        }
+    }
         <c:if test="${not status.last}">,</c:if>
-        </c:forEach>
+    </c:forEach>
     ];
 </script>
 

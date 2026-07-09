@@ -1,4 +1,4 @@
-a<%-- 
+<%-- 
     Document   : cart
     Created on : Jun 20, 2026, 12:20:13 PM
     Author     : ADMIN
@@ -54,7 +54,8 @@ a<%--
                                 <a href="${pageContext.request.contextPath}/cart?action=remove&id=${item.product.id}" class="btn btn-sm btn-outline-danger">Xóa</a>
                             </td>
                         </tr>
-                        <c:set var="totalPrice" value="${totalPrice + (item.product.price * item.quantity)}" />₫
+                        </tr>
+                        <c:set var="totalPrice" value="${totalPrice + (item.product.price * item.quantity)}" />
                     </c:forEach>
                 </tbody>
             </table>
