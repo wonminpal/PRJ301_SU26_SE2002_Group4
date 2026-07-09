@@ -69,12 +69,12 @@
                 <c:forEach items="${productList}" var="p">
                     <div class="col">
                         <div class="card h-100 border-0 shadow-sm product-card p-2">
-                            <a href="${pageContext.request.contextPath}/product?id=${p.id}" class="text-center p-3">
+                            <a href="${pageContext.request.contextPath}/detail?slug=${p.slug}" class="text-center p-3">
                                 <img src="${p.displayImageUrl}" class="card-img-top object-fit-contain" alt="${p.name}" style="height: 200px;">
                             </a>
 
                             <div class="card-body d-flex flex-column pt-0">
-                                <a href="${pageContext.request.contextPath}/product?id=${p.id}" class="text-decoration-none text-dark">
+                                <a href="${pageContext.request.contextPath}/detail?slug=${p.slug}" class="text-decoration-none text-dark">
                                     <h6 class="card-title fw-bold" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 40px;">
                                         ${p.name}
                                     </h6>

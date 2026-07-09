@@ -18,6 +18,7 @@ public class Product {
     private String slug;
     private int status;
     private Date createdAt;
+    private int stockQuantity; // Khai báo biến
 
     private double displayPrice;
     private String displayImageUrl;
@@ -143,10 +144,17 @@ public class Product {
     public int getProductId() {
         return this.id; // Vì trong class của Nhân, ID chính là Product ID
     }
-        // Thêm các hàm này vào cuối class Product để code cũ không lỗi
+    // Thêm các hàm này vào cuối class Product để code cũ không lỗi
 
     public String getImageUrl() {
         return this.displayImageUrl;
     }
 
+    public int getStockQuantity() {
+        return stockQuantity;
+    }
+
+    public void setStockQuantity(int stockQuantity) {
+        this.stockQuantity = stockQuantity;
+    }
 }
