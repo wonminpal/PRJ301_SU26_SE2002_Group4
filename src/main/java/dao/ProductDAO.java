@@ -334,6 +334,53 @@ public class ProductDAO extends DBContext {
         }
         return null;
     }
+// Hàm 1: Đếm số sản phẩm của một danh mục (để chia trang)
+    public int countProductsByCategory(String categorySlug) {
+        String sql = "SELECT COUNT(*) FROM Products p JOIN Categories c ON p.category_id = c.id WHERE p.[status] = 1 AND c.slug = ?";
+        try {
+            PreparedStatement ps = getConnection().prepareStatement(sql);
+            ps.setString(1, categorySlug);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    // Hàm 2: Lấy danh sách sản phẩm theo danh mục (có phân trang)
+    public List<Product> getProductsByCategory(String categorySlug, int page, int pageSize) {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT p.id, p.[name], p.slug, p.brand, "
+                   + "(SELECT MIN(pr.price) FROM Product_Variants pr WHERE pr.product_id = p.id AND pr.stock_quantity > 0) as display_price, "
+                   + "(SELECT TOP 1 proImg.image_url FROM Product_Images proImg WHERE proImg.product_id = p.id AND proImg.is_thumbnail = 1) as display_image "
+                   + "FROM Products p JOIN Categories c ON p.category_id = c.id "
+                   + "WHERE p.[status] = 1 AND c.slug = ? "
+                   + "ORDER BY p.created_at DESC "
+                   + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        try {
+            PreparedStatement ps = getConnection().prepareStatement(sql);
+            ps.setString(1, categorySlug);
+            ps.setInt(2, (page - 1) * pageSize);
+            ps.setInt(3, pageSize);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product();
+                p.setId(rs.getInt("id"));
+                p.setName(rs.getString("name"));
+                p.setBrand(rs.getString("brand"));
+                p.setSlug(rs.getString("slug"));
+                p.setDisplayPrice(rs.getDouble("display_price"));
+                p.setDisplayImageUrl(rs.getString("display_image"));
+                list.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
     // Giữ nguyên các hàm khác của bạn Nhân (getLatestProducts, countSearchProducts...)
 }

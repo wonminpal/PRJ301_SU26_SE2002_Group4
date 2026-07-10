@@ -1,4 +1,4 @@
-a<%-- 
+<%-- 
     Document   : cart
     Created on : Jun 20, 2026, 12:20:13 PM
     Author     : ADMIN
@@ -35,26 +35,43 @@ a<%--
                     <c:forEach items="${cartItems}" var="item">
                         <tr>
                             <td><img src="${item.product.imageUrl}" width="70" alt="${item.product.name}"></td>
-                            <td class="text-start fw-bold">${item.product.name}</td>
+                            
+                            <td class="text-start fw-bold">
+                                ${item.product.name}
+                                
+                                <!-- Cai in ra bien the khi chon san pham nhu MAU SAC (ĐEN,TRẮNG,..) DUNG LUONG ( 256GB,1TB,..)
+                                <c:if test="${not empty item.variant && item.variant != 'Mặc định'}">
+                                    <br><small class="text-muted fw-normal">${item.variant}</small>
+                                </c:if> 
+                                -->
+                                
+                            </td>
+                            
                             <td class="align-middle fw-bold text-danger">
                                 <fmt:formatNumber value="${item.product.displayPrice}" pattern="#,###"/>₫
                             </td>
+                            
                             <td>
                                 <form action="${pageContext.request.contextPath}/cart" method="post" class="d-flex justify-content-center">
                                     <input type="hidden" name="action" value="update">
                                     <input type="hidden" name="id" value="${item.product.id}">
+                                    <input type="hidden" name="variant" value="${item.variant}">
+                                    
                                     <input type="number" name="quantity" value="${item.quantity}" min="1" class="form-control form-control-sm text-center" style="width: 70px;">
                                     <button type="submit" class="btn btn-sm btn-outline-secondary ms-1">Cập nhật</button>
                                 </form>
                             </td>
+                            
                             <td class="align-middle fw-bold text-danger">
                                 <fmt:formatNumber value="${item.product.displayPrice * item.quantity}" pattern="#,###"/>₫
                             </td>
+                            
                             <td>
-                                <a href="${pageContext.request.contextPath}/cart?action=remove&id=${item.product.id}" class="btn btn-sm btn-outline-danger">Xóa</a>
+                                <a href="${pageContext.request.contextPath}/cart?action=remove&id=${item.product.id}&variant=${item.variant}" class="btn btn-sm btn-outline-danger">Xóa</a>
                             </td>
                         </tr>
-                        <c:set var="totalPrice" value="${totalPrice + (item.product.price * item.quantity)}" />₫
+                        
+                        <c:set var="totalPrice" value="${totalPrice + (item.product.displayPrice * item.quantity)}" />
                     </c:forEach>
                 </tbody>
             </table>
