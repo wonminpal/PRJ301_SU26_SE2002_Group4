@@ -70,8 +70,9 @@
                                 <a href="${pageContext.request.contextPath}/cart?action=remove&id=${item.product.id}&variant=${item.variant}" class="btn btn-sm btn-outline-danger">Xóa</a>
                             </td>
                         </tr>
-                        
+        
                         <c:set var="totalPrice" value="${totalPrice + (item.product.displayPrice * item.quantity)}" />
+
                     </c:forEach>
                 </tbody>
             </table>

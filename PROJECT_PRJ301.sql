@@ -157,7 +157,7 @@ GO
 
 -- Tài khoản mẫu (Mật khẩu: 123456)
 INSERT INTO Users (full_name, email, password, phone, address, role)
-VALUES (N'Lê Nguyễn Thành Tài', 'tai@fpt.edu.vn', 'e10adc3949ba59abbe56e057f20f883e', '0909123456', N'Cần Thơ', 0); 
+VALUES (N'Lê Nguyễn Thành Tài', 'tai@fpt.edu.vn', 'e10adc3949ba59abbe56e057f20f883e', '0909123456', N'Cần Thơ', 1); 
 
 -- Danh mục Gốc (Level 1) & Con (Level 2)
 INSERT INTO Categories (name, description, parent_id, slug, status) VALUES 
@@ -212,3 +212,4 @@ INSERT INTO Product_Variants (product_id, sku, color, storage_capacity, price, s
 GO
 
 SELECT * from Product_Variants
+

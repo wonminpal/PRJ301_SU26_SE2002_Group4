@@ -25,7 +25,7 @@ public class ProductDAO extends DBContext {
     // Hàm lấy danh sách sản phẩm mới nhất để hiển thị ở Trang chủ
     public List<Product> getLatestProducts(int limit) {
         List<Product> list = new ArrayList<>();
-        String sql = "SELECT TOP (?) p.id, p.name, p.slug, p.brand, p.category_id, "
+        String sql = "SELECT TOP (?) p.id, p.name, p.description, p.slug, p.brand, p.category_id, "
                 + "(SELECT MIN(price) FROM Product_Variants WHERE product_id = p.id AND stock_quantity > 0) AS display_price, "
                 + "(SELECT TOP 1 image_url FROM Product_Images WHERE product_id = p.id AND is_thumbnail = 1) AS display_image "
                 + "FROM Products p "
@@ -90,6 +90,7 @@ public class ProductDAO extends DBContext {
                 p.setDescription(rsProduct.getString("description"));
                 p.setBrand(rsProduct.getString("brand"));
                 p.setSlug(rsProduct.getString("slug"));
+                p.setStockQuantity(rsProduct.getInt("stock_quantity"));
 
                 Category cat = new Category();
                 cat.setId(rsProduct.getInt("category_id"));
@@ -334,6 +335,137 @@ public class ProductDAO extends DBContext {
         }
         return null;
     }
+
+    public int insertProduct(Product p) {
+        String sql = "INSERT INTO Products (category_id, name, description, price, brand, image_url, slug, stock_quantity, status, created_at) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
+
+        try {
+            // Sử dụng RETURN_GENERATED_KEYS để lấy ID tự động sinh ra
+            PreparedStatement statement = this.getConnection().prepareStatement(sql);
+
+            statement.setInt(1, p.getCategoryId());
+            statement.setString(2, p.getName());
+            statement.setString(3, p.getDescription());
+            statement.setDouble(4, p.getPrice());
+            statement.setString(5, p.getBrand());
+            statement.setString(6, p.getDisplayImageUrl());
+            statement.setString(7, p.getSlug());
+            statement.setInt(8, p.getStockQuantity());
+            statement.setInt(9, p.getStatus());
+
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows > 0) {
+                ResultSet rs = statement.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1); // Trả về ID của sản phẩm mới chèn
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Lỗi tại insertProduct: " + ex.getMessage());
+        }
+        return 0;
+    }
+
+    // Hàm cập nhật thông tin sản phẩm theo ID
+    public boolean updateProduct(Product p) {
+        String sql = "UPDATE Products SET category_id = ?, name = ?, description = ?, price = ?, "
+                + "brand = ?, image_url = ?, slug = ?, status = ? WHERE id = ?";
+
+        try {
+            PreparedStatement statement = this.getConnection().prepareStatement(sql);
+
+            statement.setInt(1, p.getCategoryId());
+            statement.setString(2, p.getName());
+            statement.setString(3, p.getDescription());
+            statement.setDouble(4, p.getPrice());
+            statement.setString(5, p.getBrand());
+            statement.setString(6, p.getDisplayImageUrl());
+            statement.setString(7, p.getSlug());
+            statement.setInt(8, p.getStockQuantity());
+            statement.setInt(9, p.getStatus());
+            statement.setInt(10, p.getId());
+
+            return statement.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Lỗi tại updateProduct: " + ex.getMessage());
+        }
+        return false;
+    }
+
+    // Hàm ẩn/ngừng kinh doanh sản phẩm (Xóa mềm)
+    public boolean deleteProductSoft(int id) {
+        String sql = "UPDATE Products SET status = 0 WHERE id = ?";
+
+        try {
+            PreparedStatement statement = this.getConnection().prepareStatement(sql);
+            statement.setInt(1, id);
+
+            return statement.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Lỗi tại deleteProductSoft: " + ex.getMessage());
+        }
+        return false;
+    }
+
+    // Hàm thêm mới một biến thể sản phẩm (Màu, dung lượng, giá riêng)
+    public boolean insertVariant(ProductVariant pv) {
+        String sql = "INSERT INTO Product_Variants (product_id, sku, color, storage_capacity, price, stock_quantity, variant_image) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try {
+            PreparedStatement statement = this.getConnection().prepareStatement(sql);
+
+            statement.setInt(1, pv.getProductId());
+            statement.setString(2, pv.getSku());
+            statement.setString(3, pv.getColor());
+            statement.setString(4, pv.getStorageCapacity());
+            statement.setDouble(5, pv.getPrice());
+            statement.setInt(6, pv.getStockQuantity());
+            statement.setString(7, pv.getVariantImage());
+
+            return statement.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Lỗi tại insertVariant: " + ex.getMessage());
+        }
+        return false;
+    }
+
+    // Hàm thêm ảnh phụ vào bộ sưu tập sản phẩm
+    public boolean insertProductImage(int productId, String imageUrl, boolean isThumbnail) {
+        String sql = "INSERT INTO Product_Images (product_id, image_url, is_thumbnail) VALUES (?, ?, ?)";
+        try {
+            PreparedStatement statement = this.getConnection().prepareStatement(sql);
+
+            statement.setInt(1, productId);
+            statement.setString(2, imageUrl);
+            statement.setBoolean(3, isThumbnail);
+
+            return statement.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Lỗi tại insertProductImage: " + ex.getMessage());
+        }
+        return false;
+    }
+
+    // Hàm xóa toàn bộ biến thể cũ của một sản phẩm để chuẩn bị cập nhật lại
+    public boolean deleteVariantsByProductId(int productId) {
+        String sql = "DELETE FROM Product_Variants WHERE product_id = ?";
+        try {
+            PreparedStatement statement = this.getConnection().prepareStatement(sql);
+            statement.setInt(1, productId);
+
+            return statement.executeUpdate() >= 0; // Trả về true kể cả khi sản phẩm chưa có variant nào
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Lỗi tại deleteVariantsByProductId: " + ex.getMessage());
+        }
+        return false;
+    }
 // Hàm 1: Đếm số sản phẩm của một danh mục (để chia trang)
     public int countProductsByCategory(String categorySlug) {
         String sql = "SELECT COUNT(*) FROM Products p JOIN Categories c ON p.category_id = c.id WHERE p.[status] = 1 AND c.slug = ?";
@@ -381,6 +513,5 @@ public class ProductDAO extends DBContext {
         }
         return list;
     }
-
     // Giữ nguyên các hàm khác của bạn Nhân (getLatestProducts, countSearchProducts...)
 }

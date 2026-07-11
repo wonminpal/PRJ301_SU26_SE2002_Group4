@@ -17,9 +17,9 @@ public class OrderServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("account");
 
-        // Chỉ cho phép xem đơn hàng khi đã đăng nhập
+        // 1. Kiểm tra đăng nhập bằng ContextPath để tránh lỗi đường dẫn 404
         if (user == null) {
-            response.sendRedirect("auth");
+            response.sendRedirect(request.getContextPath() + "/auth?action=loginForm");
             return;
         }
 
@@ -34,7 +34,7 @@ public class OrderServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("account");
 
-        // Lấy Guest Token từ Cookie
+        // Lấy Guest Token từ Cookie (Cho chức năng giỏ hàng vãng lai)
         String guestToken = null;
         if (request.getCookies() != null) {
             for (Cookie c : request.getCookies()) {
@@ -48,29 +48,64 @@ public class OrderServlet extends HttpServlet {
         OrderDAO orderDAO = new OrderDAO();
         String path = request.getServletPath();
 
+        // ===============================================
+        // LUỒNG 1: HIỂN THỊ TRANG XÁC NHẬN THANH TOÁN
+        // ===============================================
         if (path.equals("/checkout")) {
-            // Nếu chưa đăng nhập, chuyển về trang auth
             if (user == null) {
                 response.sendRedirect(request.getContextPath() + "/auth?action=loginForm");
-                return; // Dừng lại không cho vào trang checkout
-            }
-
-            // Nếu đã đăng nhập thì mới cho thanh toán
-            int userId = user.getId();
-
-            // Lấy giỏ hàng theo User hoặc Guest
-            List<CartItem> cartItems = cartDAO.getCartItems(user != null ? user.getId() : null, guestToken);
-            if (cartItems == null || cartItems.isEmpty()) {
-                response.sendRedirect("cart");
                 return;
             }
+
+            List<CartItem> cartItems = cartDAO.getCartItems(user.getId(), guestToken);
+            if (cartItems == null || cartItems.isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/cart");
+                return;
+            }
+
             double totalPrice = cartItems.stream().mapToDouble(i -> i.getProduct().getPrice() * i.getQuantity()).sum();
             request.setAttribute("cartItems", cartItems);
             request.setAttribute("totalPrice", totalPrice);
             request.getRequestDispatcher("/WEB-INF/views/client/order/checkout.jsp").forward(request, response);
-        } else if (path.equals("/order")) {
-            // Xử lý đặt hàng tương tự, nhớ truyền user.getId() hoặc null
-            // ... (Code đặt hàng của Phúc)
+        } // ===============================================
+        // LUỒNG 2: XỬ LÝ LƯU ĐƠN HÀNG XUỐNG DATABASE
+        // ===============================================
+        else if (path.equals("/order")) {
+            if (user == null) {
+                response.sendRedirect(request.getContextPath() + "/auth?action=loginForm");
+                return;
+            }
+
+            int userId = user.getId();
+            String address = request.getParameter("address");
+            String phone = request.getParameter("phone");
+
+            try {
+                List<CartItem> cartItems = cartDAO.getCartItems(userId, guestToken);
+
+                if (cartItems == null || cartItems.isEmpty()) {
+                    request.setAttribute("errorMsg", "Giỏ hàng rỗng, không thể tiến hành thanh toán!");
+                    request.getRequestDispatcher("/WEB-INF/views/client/order/checkout.jsp").forward(request, response);
+                    return;
+                }
+
+                // Thực thi Transaction (Trừ kho, Thêm Bill, Xóa Giỏ)
+                boolean success = orderDAO.placeOrder(userId, address, phone, cartItems);
+
+                if (success) {
+                    response.sendRedirect(request.getContextPath() + "/order");
+                }
+            } catch (Exception e) {
+                // Bắt lỗi Transaction (Hết hàng tồn kho) và ném về lại trang checkout
+                request.setAttribute("errorMsg", e.getMessage());
+
+                List<CartItem> cartItems = cartDAO.getCartItems(userId, guestToken);
+                double totalPrice = cartItems.stream().mapToDouble(i -> i.getProduct().getPrice() * i.getQuantity()).sum();
+                request.setAttribute("cartItems", cartItems);
+                request.setAttribute("totalPrice", totalPrice);
+
+                request.getRequestDispatcher("/WEB-INF/views/client/order/checkout.jsp").forward(request, response);
+            }
         }
     }
 }

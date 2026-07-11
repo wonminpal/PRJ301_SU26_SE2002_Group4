@@ -10,6 +10,7 @@ public class Order {
     private double totalAmount;
     private double finalAmount;
     private String status;
+    private Timestamp completedDate;
     private String shippingAddress;
     private String shippingPhone;
     private Timestamp createdAt;
@@ -88,5 +89,13 @@ public class Order {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+    public boolean isCanReturn() {
+        if ("Hoàn thành".equals(this.status) && this.completedDate != null) {
+            long diffMillis = System.currentTimeMillis() - this.completedDate.getTime();
+            long diffDays = diffMillis / (24 * 60 * 60 * 1000);
+            return diffDays <= 7;
+        }
+        return false;
     }
 }
