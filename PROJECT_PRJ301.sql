@@ -212,5 +212,4 @@ INSERT INTO Product_Variants (product_id, sku, color, storage_capacity, price, s
 GO
 
 SELECT * from Product_Variants
-Go
 

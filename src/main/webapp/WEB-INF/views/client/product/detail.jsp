@@ -103,5 +103,30 @@
     }
 </style>
 
+<script>
+    // Cấu trúc danh sách các biến thể sản phẩm
+    const variants = [
+    <c:forEach items="${product.variants}" var="v" varStatus="status">
+    {
+    id: ${v.id},
+            color: "${v.color}",
+            capacity: "${v.storageCapacity}",
+            price: ${v.price},
+            stock: ${v.stockQuantity}
+    }
+        <c:if test="${not status.last}">,</c:if>
+    </c:forEach>
+    ];
+</script>
+
+<script src="${pageContext.request.contextPath}/assets/js/product-detail.js"></script>
+
+<style>
+    .variant-btn.active {
+        background-color: #dc3545;
+        color: white;
+    }
+</style>
+
 <jsp:include page="/WEB-INF/views/include/footer.jsp" />
 
