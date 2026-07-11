@@ -212,3 +212,16 @@ INSERT INTO Product_Variants (product_id, sku, color, storage_capacity, price, s
 GO
 
 SELECT * from Product_Variants
+
+INSERT INTO Vouchers (code, discount_percent, max_discount, min_order_value, expiry_date, usage_limit, used_count)
+VALUES 
+('CUUTUIROIMON', 15, 300000, 0, '2026-12-31 23:59:59', 99, 0),
+('FEMBOY', 20, 500000, 0, '2026-12-31 23:59:59', 50, 0),
+('GROUP410DIEM', 99, 9999999, 999000000, '2026-12-31 23:59:59', 1, 0),
+('NLOVEP', 10, 100000, 0, '2026-12-31 23:59:59', 100, 0),
+('NGHEO_CONGAT', 10, 100000, 0, '2026-12-31 23:59:59', 100, 0),
+('BIGSALE30', 30, 1500000, 25000000, '2026-12-31 23:59:59', 20, 0),
+('WELCOME5', 5, 100000, 0, '2026-12-31 23:59:59', 500, 0),
+('SOLDOUT', 10, 200000, 0, '2026-12-31 23:59:59', 10, 10),
+('EXPIRED50', 50, 2000000, 0, '2026-01-01 00:00:00', 50, 0);
+GO
