@@ -1,12 +1,14 @@
 package controller;
 
 import dao.ProductDAO;
+import dao.ReviewDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import model.Product;
 
 @WebServlet(name = "DetailServlet", urlPatterns = {"/detail"})
@@ -33,7 +35,12 @@ public class DetailServlet extends HttpServlet {
                 // Đẩy dữ liệu Product qua detail.jsp để JSTL render
                 System.out.println("=== [DEBUG] THÀNH CÔNG: Tìm thấy sản phẩm " + product.getName() + " ===");
                 System.out.println("=== TỒN KHO GỐC BẢNG PRODUCT: " + product.getStockQuantity() + " ===");
-
+                ReviewDAO reviewDAO = new ReviewDAO();
+                // Giả định tên hàm trong ReviewDAO của bạn là getReviewsByProductId hoặc tương đương
+                List<?> listReview = reviewDAO.getReviewsByProductId(product.getId()); 
+                
+                // 2. Đính kèm danh sách review vào request thuộc tính "reviewList"
+                request.setAttribute("reviewList", listReview);
                 request.setAttribute("product", product);
                 request.getRequestDispatcher("/WEB-INF/views/client/product/detail.jsp").forward(request, response);
             } else {

@@ -73,7 +73,11 @@
         </div>
     </div>
 </div>
-
+        <div class="mt-4 pt-3 border-top">
+                <a href="${pageContext.request.contextPath}/review?productId=${product.id}&slug=${product.slug}" class="btn btn-outline-dark w-100 fw-bold">
+                    ⭐ Xem & Viết Đánh Giá Sản Phẩm
+                </a>
+            </div>        
 <script>
     // Cấu trúc danh sách các biến thể sản phẩm
     const variants = [

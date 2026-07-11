@@ -32,24 +32,33 @@
                             <tr>
                                 <td class="fw-bold text-secondary">#ORD-${order.id}</td>
                                 <td><fmt:formatDate value="${order.createdAt}" pattern="dd/MM/yyyy HH:mm"/></td>
-                                <td class="text-start">${order.shippingAddress}</td>
-                                <td>${order.shippingPhone}</td>
-                                <td class="text-danger fw-bold">$${order.finalAmount}</td>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${order.status eq 'Chờ xác nhận'}">
-                                            <span class="badge bg-warning text-dark">${order.status}</span>
-                                        </c:when>
-                                        <c:when test="${order.status eq 'Hoàn thành'}">
-                                            <span class="badge bg-success">${order.status}</span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="badge bg-secondary">${order.status}</span>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </td>
-                            </tr>
-                        </c:forEach>
+                        <td class="text-start">${order.shippingAddress}</td>
+                        <td>${order.shippingPhone}</td>
+                        <td class="text-danger fw-bold">$${order.finalAmount}</td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${order.status eq 'Chờ xác nhận'}">
+                                    <span class="badge bg-warning text-dark">${order.status}</span>
+                                </c:when>
+                                <c:when test="${order.status eq 'Hoàn thành'}">
+                                    <span class="badge bg-success">${order.status}</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="badge bg-secondary">${order.status}</span>
+                                </c:otherwise>
+                            </c:choose>
+                            <c:if test="${order.canReturn}">
+                                <form action="${pageContext.request.contextPath}/order" method="post" class="d-inline">
+                                    <input type="hidden" name="action" value="return">
+                                    <input type="hidden" name="orderId" value="${order.id}">
+                                    <button type="submit" class="btn btn-warning btn-sm fw-bold" onclick="return confirm('Bạn chắc chắn muốn trả hàng đơn này?');">
+                                        Trả hàng
+                                    </button>
+                                </form>
+                            </c:if>
+                        </td>
+                        </tr>
+                    </c:forEach>
                     </tbody>
                 </table>
             </div>
