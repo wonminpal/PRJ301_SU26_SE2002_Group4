@@ -73,6 +73,35 @@
         </div>
     </div>
 </div>
+        <div class="mt-4 pt-3 border-top">
+                <a href="${pageContext.request.contextPath}/review?productId=${product.id}&slug=${product.slug}" class="btn btn-outline-dark w-100 fw-bold">
+                    ⭐ Xem & Viết Đánh Giá Sản Phẩm
+                </a>
+            </div>        
+<script>
+    // Cấu trúc danh sách các biến thể sản phẩm
+    const variants = [
+    <c:forEach items="${product.variants}" var="v" varStatus="status">
+    {
+    id: ${v.id},
+            color: "${v.color}",
+            capacity: "${v.storageCapacity}",
+            price: ${v.price},
+            stock: ${v.stockQuantity}
+    }
+        <c:if test="${not status.last}">,</c:if>
+    </c:forEach>
+    ];
+</script>
+
+<script src="${pageContext.request.contextPath}/assets/js/product-detail.js"></script>
+
+<style>
+    .variant-btn.active {
+        background-color: #dc3545;
+        color: white;
+    }
+</style>
 
 <script>
     // Cấu trúc danh sách các biến thể sản phẩm

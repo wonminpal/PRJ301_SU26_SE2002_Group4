@@ -157,7 +157,7 @@ GO
 
 -- Tài khoản mẫu (Mật khẩu: 123456)
 INSERT INTO Users (full_name, email, password, phone, address, role)
-VALUES (N'Lê Nguyễn Thành Tài', 'tai@fpt.edu.vn', 'e10adc3949ba59abbe56e057f20f883e', '0909123456', N'Cần Thơ', 0); 
+VALUES (N'Lê Nguyễn Thành Tài', 'tai@fpt.edu.vn', 'e10adc3949ba59abbe56e057f20f883e', '0909123456', N'Cần Thơ', 1); 
 
 -- Danh mục Gốc (Level 1) & Con (Level 2)
 INSERT INTO Categories (name, description, parent_id, slug, status) VALUES 
@@ -213,6 +213,7 @@ GO
 
 SELECT * from Product_Variants
 
+<<<<<<< HEAD
 INSERT INTO Vouchers (code, discount_percent, max_discount, min_order_value, expiry_date, usage_limit, used_count)
 VALUES 
 ('CUUTUIROIMON', 15, 300000, 0, '2026-12-31 23:59:59', 99, 0),
@@ -225,3 +226,5 @@ VALUES
 ('SOLDOUT', 10, 200000, 0, '2026-12-31 23:59:59', 10, 10),
 ('EXPIRED50', 50, 2000000, 0, '2026-01-01 00:00:00', 50, 0);
 GO
+=======
+>>>>>>> 030eed3dcbb1f9f932b66e6c8c57e3688aea4ce3
