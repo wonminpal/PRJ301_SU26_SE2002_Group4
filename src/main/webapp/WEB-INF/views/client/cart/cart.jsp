@@ -49,10 +49,8 @@
                                 <a href="${pageContext.request.contextPath}/cart?action=remove&id=${item.product.id}&variant=${item.variant}" class="btn btn-sm btn-outline-danger">Xóa</a>
                             </td>
                         </tr>
-<<<<<<< HEAD
-=======
         
->>>>>>> 030eed3dcbb1f9f932b66e6c8c57e3688aea4ce3
+
                         <c:set var="totalPrice" value="${totalPrice + (item.product.displayPrice * item.quantity)}" />
 
                     </c:forEach>

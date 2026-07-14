@@ -213,7 +213,6 @@ GO
 
 SELECT * from Product_Variants
 
-<<<<<<< HEAD
 INSERT INTO Vouchers (code, discount_percent, max_discount, min_order_value, expiry_date, usage_limit, used_count)
 VALUES 
 ('CUUTUIROIMON', 15, 300000, 0, '2026-12-31 23:59:59', 99, 0),
@@ -226,5 +225,4 @@ VALUES
 ('SOLDOUT', 10, 200000, 0, '2026-12-31 23:59:59', 10, 10),
 ('EXPIRED50', 50, 2000000, 0, '2026-01-01 00:00:00', 50, 0);
 GO
-=======
->>>>>>> 030eed3dcbb1f9f932b66e6c8c57e3688aea4ce3
+
