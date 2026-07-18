@@ -56,9 +56,8 @@ public class CategoryDAO extends DBContext {
                     rootCategories.add(currentCategory);
                 } else {
                     Category parentCategory = map.get(currentCategory.getParentId());
-
-                    if (currentCategory != null) {
-                        parentCategory.getChildren().add(parentCategory);
+                    if (parentCategory != null) {
+                        parentCategory.getChildren().add(currentCategory);
                     }
                 }
             }
@@ -67,5 +66,133 @@ public class CategoryDAO extends DBContext {
         }
 
         return rootCategories;
+    }
+
+    public Category getCategoryById(int id) {
+        String sql = "SELECT * FROM Categories WHERE id = ?";
+        try (PreparedStatement ps = this.getConnection().prepareStatement(sql);) {
+
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Category c = new Category();
+                    c.setId(rs.getInt("id"));
+                    c.setName(rs.getString("name"));
+                    c.setSlug(rs.getString("slug"));
+                    return c;
+                }
+            }
+        } catch (SQLException ex) {
+            java.util.logging.Logger.getLogger(CategoryDAO.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public boolean addCategory(String name, String slug) {
+        String sql = "INSERT INTO Categories (name, slug) VALUES (?, ?)";
+        try (PreparedStatement ps = this.getConnection().prepareStatement(sql);) {
+
+            ps.setString(1, name);
+            ps.setString(2, slug);
+
+            return ps.executeUpdate() > 0;
+        } catch (java.sql.SQLException ex) {
+            Logger.getLogger(CategoryDAO.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Lỗi tại insertCategory: " + ex.getMessage());
+        }
+        return false;
+    }
+
+    public List<Category> getAllCategories() {
+        List<Category> list = new ArrayList<>();
+        String sql = "SELECT * FROM Categories ORDER BY id ASC";
+        try (PreparedStatement ps = this.getConnection().prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Category c = new Category();
+                c.setId(rs.getInt("id"));
+                c.setName(rs.getString("name"));
+                c.setSlug(rs.getString("slug"));
+                c.setStatus(rs.getBoolean("status"));
+                list.add(c);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CategoryDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
+    }
+
+    public boolean checkCategoryExist(String name) {
+        String sql = "SELECT COUNT(*) FROM Categories WHERE name = ?";
+        // FIX: Đóng gói Connection và PreparedStatement an toàn
+        try (PreparedStatement ps = this.getConnection().prepareStatement(sql)) {
+
+            ps.setString(1, name.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CategoryDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    public boolean updateCategory(int id, String name, String slug) {
+        String sql = "UPDATE Categories SET name = ?, slug = ? WHERE id = ?";
+        try (PreparedStatement ps = this.getConnection().prepareStatement(sql)) {
+
+            ps.setString(1, name);
+            ps.setString(2, slug);
+            ps.setInt(3, id);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            java.util.logging.Logger.getLogger(CategoryDAO.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    public boolean checkCategoryExistForUpdate(int id, String name, String slug) {
+        // Thêm điều kiện kiểm tra (name = ? OR slug = ?)
+        String sql = "SELECT COUNT(*) FROM Categories WHERE (name = ? OR slug = ?) AND id <> ?";
+        try (java.sql.Connection conn = this.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, name.trim());
+            ps.setString(2, slug.trim());
+            ps.setInt(3, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException ex) {
+            java.util.logging.Logger.getLogger(CategoryDAO.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    public boolean softDeleteCategory(int id) {
+        String sql = "UPDATE Categories SET status = 0 WHERE id = ?";
+        try (PreparedStatement ps = this.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(CategoryDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    public boolean restoreCategory(int id) {
+        String sql = "UPDATE Categories SET status = 1 WHERE id = ?";
+        try (PreparedStatement ps = this.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(CategoryDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
     }
 }

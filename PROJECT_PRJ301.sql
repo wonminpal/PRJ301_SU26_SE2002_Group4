@@ -213,3 +213,4 @@ GO
 
 SELECT * from Product_Variants
 
+    SELECT * from Products
