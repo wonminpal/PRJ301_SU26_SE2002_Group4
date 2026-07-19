@@ -13,10 +13,26 @@
             </div>
             <span id="save-status" class="badge bg-secondary p-2 shadow-sm">Chưa lưu tạm</span>
         </div>
-        
+
+        <c:if test="${param.error == 'empty_name'}">
+            <div class="alert alert-danger py-2 fw-bold shadow-sm mb-3">
+                ⚠ Lỗi: Tên sản phẩm không được bỏ trống!
+            </div>
+        </c:if>
+
+        <c:if test="${param.error == 'duplicate_name'}">
+            <div class="alert alert-warning py-2 fw-bold shadow-sm mb-3">
+                ⚠ Lỗi: Tên sản phẩm này đã được sử dụng (trùng đường dẫn URL)! Vui lòng nhập tên khác.
+            </div>
+        </c:if>
+
+        <c:if test="${param.error == 'exception'}">
+            <div class="alert alert-danger py-2 shadow-sm mb-3">
+                ⚠ Lỗi hệ thống: Không thể thực hiện thao tác lúc này!
+            </div>
+        </c:if>
         <!-- Form trỏ về Servlet xử lý bằng phương thức POST -->
-        <form action="${pageContext.request.contextPath}/adminProduct" method="post" id="productForm">
-            
+        <form action="${pageContext.request.contextPath}/adminProduct?action=add" method="post" id="productForm">
             <!-- 1. KHỐI THÔNG TIN CHUNG (Chuẩn Responsive Grid) -->
             <h5 class="fw-bold text-dark mb-3">1. Thông tin cơ bản</h5>
             <div class="row">
@@ -45,7 +61,7 @@
                 <label class="form-label fw-bold">Đường dẫn hình ảnh gốc sản phẩm</label>
                 <input type="text" name="displayImageUrl" id="displayImageUrl" class="form-control" placeholder="Ví dụ: assets/images/products/... " required>
             </div>
-            
+
             <div class="mb-4">
                 <label class="form-label fw-bold">Thông số & Mô tả tóm tắt sản phẩm</label>
                 <textarea name="description" id="description" class="form-control" rows="3" placeholder="Nhập đặc điểm nổi bật..."></textarea>
@@ -169,7 +185,7 @@
     form.addEventListener('input', () => {
         statusBadge.innerText = "✍️ Đang ghi nhận...";
         statusBadge.className = "badge bg-info text-dark p-2 shadow-sm";
-        
+
         formFields.forEach(fieldId => {
             const value = document.getElementById(fieldId).value;
             localStorage.setItem('draft_prj_' + fieldId, value);
@@ -190,7 +206,7 @@
 
     // Hàm xóa bản nháp thủ công bằng nút bấm
     function clearDraft() {
-        if(confirm("Bạn có chắc chắn muốn xóa sạch dữ liệu đang nhập dở để gõ lại từ đầu không?")) {
+        if (confirm("Bạn có chắc chắn muốn xóa sạch dữ liệu đang nhập dở để gõ lại từ đầu không?")) {
             formFields.forEach(fieldId => {
                 localStorage.removeItem('draft_prj_' + fieldId);
             });

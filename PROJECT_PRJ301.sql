@@ -65,7 +65,7 @@ CREATE TABLE Product_Variants (
     product_id INT FOREIGN KEY REFERENCES Products(id) ON DELETE CASCADE, 
     sku VARCHAR(50) UNIQUE, 
     color NVARCHAR(50), 
-    storage_capacity VARCHAR(50), 
+    storage_capacity NVARCHAR(50), 
     price DECIMAL(18,2) NOT NULL, 
     stock_quantity INT DEFAULT 0, 
     variant_image VARCHAR(500) 
@@ -183,7 +183,7 @@ INSERT INTO Product_Images (product_id, image_url, is_thumbnail)
 SELECT id, image_url, 1 FROM Products; 
 
 INSERT INTO Product_Variants (product_id, sku, color, storage_capacity, price, stock_quantity, variant_image)
-SELECT id, 'SKU-' + CAST(id AS VARCHAR), N'Mặc định', 'Tiêu chuẩn', price, stock_quantity, image_url FROM Products; 
+SELECT id, 'SKU-' + CAST(id AS VARCHAR), N'Mặc định', N'Tiêu chuẩn', price, stock_quantity, image_url FROM Products; 
 GO
 
 DELETE FROM Product_Images WHERE product_id = 1;
@@ -201,16 +201,26 @@ GO
 
 INSERT INTO Product_Variants (product_id, sku, color, storage_capacity, price, stock_quantity, variant_image) VALUES 
 -- Màu Đen
-(1, 'IP15PM-256-DEN', N'Titan Đen', '256GB', 28000000, 10, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-den-main.webp'),
-(1, 'IP15PM-512-DEN', N'Titan Đen', '512GB', 32000000, 5, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-den-main.webp'),
-(1, 'IP15PM-1TB-DEN', N'Titan Đen', '1TB', 36000000, 2, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-den-main.webp'),
+(1, 'IP15PM-256-DEN', N'Titan Đen', N'256GB', 28000000, 10, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-den-main.webp'),
+(1, 'IP15PM-512-DEN', N'Titan Đen', N'512GB', 32000000, 5, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-den-main.webp'),
+(1, 'IP15PM-1TB-DEN', N'Titan Đen', N'1TB', 36000000, 2, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-den-main.webp'),
 
 -- Màu Trắng
-(1, 'IP15PM-256-TRANG', N'Titan Trắng', '256GB', 28000000, 10, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-trang-main.webp'),
-(1, 'IP15PM-512-TRANG', N'Titan Trắng', '512GB', 32000000, 8, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-trang-main.webp'),
-(1, 'IP15PM-1TB-TRANG', N'Titan Trắng', '1TB', 36000000, 3, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-trang-main.webp');
+(1, 'IP15PM-256-TRANG', N'Titan Trắng', N'256GB', 28000000, 10, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-trang-main.webp'),
+(1, 'IP15PM-512-TRANG', N'Titan Trắng', N'512GB', 32000000, 8, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-trang-main.webp'),
+(1, 'IP15PM-1TB-TRANG', N'Titan Trắng', N'1TB', 36000000, 3, 'assets/images/products/iphone-15-pro-max/iphone-15-promax-trang-main.webp');
 GO
 
 SELECT * from Product_Variants
-Go
 
+INSERT INTO Vouchers (code, discount_percent, max_discount, min_order_value, expiry_date, usage_limit, used_count)
+VALUES 
+('CUUTUIROIMON', 15, 300000, 0, '2026-12-31 23:59:59', 99, 0),
+('FEMBOY', 20, 500000, 0, '2026-12-31 23:59:59', 50, 0),
+('GROUP410DIEM', 99, 9999999, 999000000, '2026-12-31 23:59:59', 1, 0),
+('NLOVEP', 10, 100000, 0, '2026-12-31 23:59:59', 100, 0),
+('NGHEO_CONGAT', 10, 100000, 0, '2026-12-31 23:59:59', 100, 0),
+('BIGSALE30', 30, 1500000, 25000000, '2026-12-31 23:59:59', 20, 0),
+('WELCOME5', 5, 100000, 0, '2026-12-31 23:59:59', 500, 0),
+('SOLDOUT', 10, 200000, 0, '2026-12-31 23:59:59', 10, 10),
+('EXPIRED50', 50, 2000000, 0, '2026-01-01 00:00:00', 50, 0);

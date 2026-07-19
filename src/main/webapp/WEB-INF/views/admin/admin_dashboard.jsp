@@ -4,8 +4,13 @@
 <jsp:include page="/WEB-INF/views/include/header.jsp" />
 
 <div class="container mt-4 mb-5" style="min-height: 70vh;">
-    <h2 class="mb-4 fw-bold">Tổng quan hệ thống</h2>
-
+    <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold m-0">Tổng quan hệ thống</h2>
+    <a href="${pageContext.request.contextPath}/adminProduct?action=list" class="btn btn-primary fw-bold shadow-sm d-flex align-items-center gap-2">
+        <span>📦</span>
+        <span>Quản Lý Kho Hàng</span>
+    </a>
+</div>
     <div class="row">
         <div class="col-12 col-lg-7 mb-4">
             <h5 class="fw-bold mb-3 text-secondary">Biểu đồ doanh thu theo tháng</h5>

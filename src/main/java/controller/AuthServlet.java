@@ -1,19 +1,15 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.UserDAO;
-import model.User;
-import java.io.IOException;
-
+import dao.VoucherDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import model.User;
 
 /**
  *
@@ -23,11 +19,6 @@ import jakarta.servlet.http.HttpSession;
 public class AuthServlet extends HttpServlet {
 
     private UserDAO userDao;
-
-    @Override
-    public void init() {
-        userDao = new UserDAO();
-    }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
@@ -47,7 +38,7 @@ public class AuthServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("action");
-
+        UserDAO userDao = new UserDAO();
         if ("login".equals(action) || "signin".equals(action)) {
             String email = request.getParameter("email");
             String password = request.getParameter("password");
@@ -57,7 +48,18 @@ public class AuthServlet extends HttpServlet {
                 HttpSession session = request.getSession();
                 session.setAttribute("account", user);
 
-                response.sendRedirect(request.getContextPath() + "/home");
+                // 🔴 KHÚC NÀY NÈ: Đếm số lượng voucher khả dụng đưa vào session
+                VoucherDAO voucherDAO = new VoucherDAO();
+                int voucherCount = voucherDAO.getAvailableVouchersCount();
+                session.setAttribute("voucherCount", voucherCount);
+                if (user.getRole() == 1) {
+                    // Nếu là Admin -> Bay thẳng vào trang Dashboard Thống kê
+                    response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+                } else {
+                    // Nếu là User bình thường -> Bay ra trang chủ mua sắm
+                    response.sendRedirect(request.getContextPath() + "/home");
+                }
+
             } else {
                 request.setAttribute("errorMessage", "Email hoặc mật khẩu không chính xác!");
                 request.getRequestDispatcher("/WEB-INF/views/account/login.jsp").forward(request, response);

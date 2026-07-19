@@ -8,42 +8,42 @@
     <!-- THANH DANH MỤC SẢN PHẨM (GIAO DIỆN TRẢI DÀI) -->
     <div class="bg-white p-3 rounded shadow-sm mb-4">
         <h5 class="fw-bold mb-3 text-dark">Danh mục nổi bật</h5>
-        
+
         <!-- Thêm w-100 để đảm bảo thẻ div chiếm trọn 100% chiều rộng -->
         <div class="d-flex flex-wrap gap-2 w-100">
-            
+
             <!-- Thêm class "flex-fill" và "text-center" vào từng nút -->
-            
+
             <!-- Nút Tất cả -->
             <a href="${pageContext.request.contextPath}/home" class="btn ${empty currentCategory ? 'btn-danger' : 'btn-outline-danger'} fw-bold rounded-pill px-3 py-2 flex-fill category-pill text-center">
                 Tất cả
             </a>
-            
+
             <!-- Điện thoại -->
             <a href="${pageContext.request.contextPath}/home?category=dien-thoai" class="btn ${currentCategory == 'dien-thoai' ? 'btn-danger' : 'border'} fw-bold text-dark rounded-pill px-3 py-2 flex-fill category-pill text-center">
                 <i class="fa-solid fa-mobile-screen-button text-primary"></i> Điện thoại
             </a>
-            
+
             <!-- Laptop -->
             <a href="${pageContext.request.contextPath}/home?category=laptop" class="btn ${currentCategory == 'laptop' ? 'btn-danger' : 'border'} fw-bold text-dark rounded-pill px-3 py-2 flex-fill category-pill text-center">
                 <i class="fa-solid fa-laptop text-success"></i> Laptop
             </a>
-            
+
             <!-- Máy tính bảng -->
             <a href="${pageContext.request.contextPath}/home?category=tablet" class="btn ${currentCategory == 'tablet' ? 'btn-danger' : 'border'} fw-bold text-dark rounded-pill px-3 py-2 flex-fill category-pill text-center">
                 <i class="fa-solid fa-tablet-screen-button text-secondary"></i> Máy tính bảng
             </a>
-            
+
             <!-- Phụ kiện -->
             <a href="${pageContext.request.contextPath}/home?category=phu-kien" class="btn ${currentCategory == 'phu-kien' ? 'btn-danger' : 'border'} fw-bold text-dark rounded-pill px-3 py-2 flex-fill category-pill text-center">
                 <i class="fa-solid fa-headphones text-info"></i> Phụ kiện
             </a>
-            
+
             <!-- Tivi -->
             <a href="${pageContext.request.contextPath}/home?category=tivi" class="btn ${currentCategory == 'tivi' ? 'btn-danger' : 'border'} fw-bold text-dark rounded-pill px-3 py-2 flex-fill category-pill text-center">
                 <i class="fa-solid fa-tv text-danger"></i> Tivi
             </a>
-            
+
         </div>
     </div>
 
@@ -86,7 +86,7 @@
                                     </span>
                                 </div>
 
-                                
+
                             </div>
                         </div>
                     </div>

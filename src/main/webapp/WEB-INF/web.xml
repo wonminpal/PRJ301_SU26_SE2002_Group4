@@ -4,9 +4,17 @@
         <servlet-name>AdminProductServlet</servlet-name>
         <servlet-class>controller.AdminProductServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AdminCategoryServlet</servlet-name>
+        <servlet-class>controller.AdminCategoryServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>AdminProductServlet</servlet-name>
         <url-pattern>/adminProduct</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminCategoryServlet</servlet-name>
+        <url-pattern>/adminCategory</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
