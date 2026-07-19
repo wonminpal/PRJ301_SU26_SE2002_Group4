@@ -54,18 +54,36 @@
                                     <fmt:formatNumber value="${order.finalAmount}" type="number" pattern="#,###" />đ
                                 </td>
 
-                                <!-- 6. Trạng thái đơn hàng kèm Badge màu sắc sinh động -->
+                                <!-- 6. Trạng thái đơn hàng kèm Badge màu sắc và Nút trả hàng -->
                                 <td>
                                     <c:choose>
                                         <c:when test="${order.status eq 'Chờ xác nhận'}">
                                             <span class="badge bg-warning text-dark px-3 py-2">Chờ xác nhận</span>
                                         </c:when>
+                                        
                                         <c:when test="${order.status eq 'Đang giao'}">
                                             <span class="badge bg-info text-white px-3 py-2">Đang giao</span>
                                         </c:when>
-                                        <c:when test="${order.status eq 'Đã giao'}">
-                                            <span class="badge bg-success text-white px-3 py-2">Đã giao</span>
+                                        
+                                        
+                                        <c:when test="${order.status eq 'Đã giao' or order.status eq 'Hoàn thành'}">
+                                            <span class="badge bg-success text-white px-3 py-2 mb-2 d-inline-block">${order.status}</span>
+                                            
+                                            <form action="${pageContext.request.contextPath}/order" method="post" class="m-0">
+                                                <input type="hidden" name="action" value="return">
+                                                <input type="hidden" name="orderId" value="${order.id}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm fw-bold w-100 shadow-sm"
+                                                        onclick="return confirm('Bạn có chắc chắn muốn trả hàng cho đơn #ORD-${order.id} không?');">
+                                                    <i class="fa-solid fa-rotate-left me-1"></i>Trả hàng
+                                                </button>
+                                            </form>
                                         </c:when>
+                                        
+                                      
+                                        <c:when test="${order.status eq 'Đã trả hàng' or order.status eq 'Yêu cầu trả hàng'}">
+                                            <span class="badge bg-danger text-white px-3 py-2">${order.status}</span>
+                                        </c:when>
+                                        
                                         <c:otherwise>
                                             <span class="badge bg-secondary text-white px-3 py-2">${order.status}</span>
                                         </c:otherwise>

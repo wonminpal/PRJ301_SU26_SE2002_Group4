@@ -145,9 +145,9 @@ public class OrderDAO extends DBContext {
 
     // 3. CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG
     public boolean updateStatus(int orderId, String status) {
-        String query = "UPDATE Orders SET status = ? WHERE id = ?";
+       String query = "UPDATE Orders SET status = ? WHERE id = ?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setString(1, status);
+            ps.setNString(1, status); // Dùng setNString thay vì setString để lưu chuẩn Unicode N'...'
             ps.setInt(2, orderId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {

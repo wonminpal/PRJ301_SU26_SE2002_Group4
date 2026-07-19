@@ -48,7 +48,35 @@ public class OrderServlet extends HttpServlet {
         OrderDAO orderDAO = new OrderDAO();
         VoucherDAO voucherDAO = new VoucherDAO();
         String path = request.getServletPath();
-
+        // ===============================================
+        // THÊM LUỒNG XỬ LÝ TRẢ HÀNG VÀ QUAY VỀ HOME
+        // ===============================================
+        String action = request.getParameter("action");
+        if ("return".equals(action)) {
+            if (user == null) {
+                response.sendRedirect(request.getContextPath() + "/auth?action=loginForm");
+                return;
+            }
+            try {
+                // Lấy ID đơn hàng từ form
+                int orderId = Integer.parseInt(request.getParameter("orderId"));
+                
+                // Cập nhật trạng thái trong database thành "Đã trả hàng"
+                boolean success = orderDAO.updateStatus(orderId, "Đã trả hàng");
+                
+                if (success) {
+                    session.setAttribute("message", "Đã trả hàng thành công!");
+                } else {
+                    session.setAttribute("error", "Có lỗi xảy ra, không thể trả hàng!");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+            // CHUYỂN HƯỚNG VỀ TRANG HOME THEO YÊU CẦU
+            response.sendRedirect(request.getContextPath() + "/home");
+            return; // Bắt buộc có return để dừng luồng, không chạy xuống code checkout bên dưới
+        }
         // ===============================================
         // LUỒNG 1: HIỂN THỊ TRANG XÁC NHẬN THANH TOÁN
         // ===============================================
