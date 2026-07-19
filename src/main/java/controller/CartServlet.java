@@ -41,12 +41,10 @@ public class CartServlet extends HttpServlet {
         if (action.equals("view")) {
             List<CartItem> cartItems = cartDAO.getCartItems(userId, guestToken);
 
-            // 💡 TỰ ĐỘNG TÍNH TỔNG TIỀN TẠM TÍNH CỦA GIỎ HÀNG
+            // TỰ ĐỘNG TÍNH TỔNG TIỀN TẠM TÍNH CỦA GIỎ HÀNG
             double subTotal = 0;
             if (cartItems != null) {
                 for (CartItem item : cartItems) {
-                    // Giả sử Model CartItem của bạn có item.getProduct().getPrice() và item.getQuantity()
-                    // Thay thế bằng hàm lấy giá chính xác của bạn nếu cần (ví dụ: item.getPrice())
                     subTotal += item.getProduct().getPrice() * item.getQuantity();
                 }
             }
@@ -79,7 +77,7 @@ public class CartServlet extends HttpServlet {
             return;
         }
 
-        // 💡 BỔ SUNG: XỬ LÝ HỦY VOUCHER KHỎI ĐƠN HÀNG (Nếu người dùng bấm xóa mã)
+        // XỬ LÝ HỦY VOUCHER KHỎI ĐƠN HÀNG (Nếu người dùng bấm xóa mã)
         if (action.equals("removeVoucher")) {
             session.removeAttribute("appliedVoucher");
             response.sendRedirect(request.getContextPath() + "/cart");
@@ -95,8 +93,28 @@ public class CartServlet extends HttpServlet {
         int productId = Integer.parseInt(idRaw);
         String variant = request.getParameter("variant");
 
+        // =============================================================
+        // 🔴 ĐÃ CẬP NHẬT: XỬ LÝ THÊM SẢN PHẨM VỚI SỐ LƯỢNG ĐỘNG TỪ FORM
+        // =============================================================
         if (action.equals("add")) {
-            cartDAO.addToCart(userId, guestToken, productId, 1, variant);
+            int quantity = 1; // Số lượng mặc định
+
+            // Đọc số lượng động do người dùng chọn từ trang chi tiết (input name="quantity")
+            String quantityRaw = request.getParameter("quantity");
+            if (quantityRaw != null && !quantityRaw.trim().isEmpty()) {
+                try {
+                    quantity = Integer.parseInt(quantityRaw);
+                } catch (NumberFormatException e) {
+                    quantity = 1; // Nếu lỗi định dạng thì ép về số lượng là 1
+                }
+            }
+
+            // Gọi DAO để thêm đúng số lượng người dùng đã chọn
+            cartDAO.addToCart(userId, guestToken, productId, quantity, variant);
+
+            // Xóa voucher cũ trong session để giỏ hàng tính lại từ đầu khi có hàng mới
+            session.removeAttribute("appliedVoucher");
+
             response.sendRedirect(request.getContextPath() + "/cart");
 
         } else if (action.equals("update")) {
@@ -105,7 +123,7 @@ public class CartServlet extends HttpServlet {
                 int quantity = Integer.parseInt(quantityRaw);
                 cartDAO.updateQuantity(userId, guestToken, productId, variant, quantity);
 
-                // 💡 Khi thay đổi số lượng, tổng tiền đổi -> Xóa voucher cũ để bắt check lại điều kiện tiền tối thiểu
+                // Khi thay đổi số lượng, tổng tiền đổi -> Xóa voucher cũ để bắt check lại điều kiện tiền tối thiểu
                 session.removeAttribute("appliedVoucher");
             }
             response.sendRedirect(request.getContextPath() + "/cart");

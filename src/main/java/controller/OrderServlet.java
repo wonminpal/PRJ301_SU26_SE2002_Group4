@@ -1,3 +1,4 @@
+
 package controller;
 
 import dao.CartDAO;
@@ -64,7 +65,7 @@ public class OrderServlet extends HttpServlet {
             }
 
             double totalPrice = cartItems.stream().mapToDouble(i -> i.getProduct().getPrice() * i.getQuantity()).sum();
-            double discountAmount = 0; // Biến tính số tiền mặt được giảm
+            double discountAmount = 0;
 
             String voucherCodeRaw = request.getParameter("voucherCode");
             if (voucherCodeRaw != null && !voucherCodeRaw.trim().isEmpty()) {
@@ -80,7 +81,6 @@ public class OrderServlet extends HttpServlet {
                     totalDiscountPercent = 100;
                 }
 
-                // Tính toán số tiền giảm và cập nhật lại tổng thanh toán
                 discountAmount = totalPrice * totalDiscountPercent / 100;
                 totalPrice = totalPrice - discountAmount;
 
@@ -91,9 +91,10 @@ public class OrderServlet extends HttpServlet {
 
             request.setAttribute("cartItems", cartItems);
             request.setAttribute("totalPrice", totalPrice);
-            request.setAttribute("discountAmount", discountAmount); // Đẩy số tiền giảm sang JSP hiển thị
+            request.setAttribute("discountAmount", discountAmount); 
             request.getRequestDispatcher("/WEB-INF/views/client/order/checkout.jsp").forward(request, response);
-        } // ===============================================
+        } 
+        // ===============================================
         // LUỒNG 2: XỬ LÝ LƯU ĐƠN HÀNG XUỐNG DATABASE
         // ===============================================
         else if (path.equals("/order")) {
@@ -115,33 +116,7 @@ public class OrderServlet extends HttpServlet {
                     return;
                 }
 
-                // Thực thi Transaction lưu đơn
-                boolean success = orderDAO.placeOrder(userId, address, phone, cartItems);
-
-                if (success) {
-                    // Cập nhật tăng used_count của voucher khi mua thành công
-                    String appliedVouchers = (String) session.getAttribute("checkoutVouchers");
-                    if (appliedVouchers != null && !appliedVouchers.trim().isEmpty()) {
-                        String[] codes = appliedVouchers.split(",");
-                        for (String code : codes) {
-                            Voucher v = voucherDAO.getVoucherByCode(code.trim().toUpperCase());
-                            if (v != null) {
-                                voucherDAO.increaseUsedCount(v.getId());
-                            }
-                        }
-                    }
-
-                    session.removeAttribute("checkoutVouchers");
-                    session.setAttribute("voucherCount", voucherDAO.getAvailableVouchersCount());
-
-                    response.sendRedirect(request.getContextPath() + "/order");
-                }
-            } catch (Exception e) {
-                request.setAttribute("errorMsg", e.getMessage());
-
-                List<CartItem> cartItems = cartDAO.getCartItems(userId, guestToken);
-                double totalPrice = cartItems.stream().mapToDouble(i -> i.getProduct().getPrice() * i.getQuantity()).sum();
-                double discountAmount = 0;
+                double finalTotalPrice = cartItems.stream().mapToDouble(i -> i.getProduct().getPrice() * i.getQuantity()).sum();
 
                 String appliedVouchers = (String) session.getAttribute("checkoutVouchers");
                 if (appliedVouchers != null && !appliedVouchers.trim().isEmpty()) {
@@ -156,16 +131,62 @@ public class OrderServlet extends HttpServlet {
                     if (totalDiscountPercent > 100) {
                         totalDiscountPercent = 100;
                     }
-                    discountAmount = totalPrice * totalDiscountPercent / 100;
-                    totalPrice = totalPrice - discountAmount;
+
+                    finalTotalPrice = finalTotalPrice - (finalTotalPrice * totalDiscountPercent / 100);
                 }
 
-                request.setAttribute("cartItems", cartItems);
-                request.setAttribute("totalPrice", totalPrice);
-                request.setAttribute("discountAmount", discountAmount);
+                // Gọi hàm placeOrder truyền sang file OrderDAO
+                boolean success = orderDAO.placeOrder(userId, address, phone, cartItems, finalTotalPrice);
 
-                request.getRequestDispatcher("/WEB-INF/views/client/order/checkout.jsp").forward(request, response);
+                if (success) {
+                    if (appliedVouchers != null && !appliedVouchers.trim().isEmpty()) {
+                        String[] codes = appliedVouchers.split(",");
+                        for (String code : codes) {
+                            Voucher v = voucherDAO.getVoucherByCode(code.trim().toUpperCase());
+                            if (v != null) {
+                                voucherDAO.increaseUsedCount(v.getId());
+                            }
+                        }
+                    }
+                    session.removeAttribute("checkoutVouchers");
+                    session.setAttribute("voucherCount", voucherDAO.getAvailableVouchersCount());
+                    response.sendRedirect(request.getContextPath() + "/order");
+                } else {
+                    request.setAttribute("errorMsg", "Lưu đơn hàng thất bại. Vui lòng kiểm tra lại kết nối Database!");
+                    quayLaiCheckoutTrang(request, response, cartItems, session, voucherDAO);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                try {
+                    List<CartItem> cartItems = cartDAO.getCartItems(userId, guestToken);
+                    request.setAttribute("errorMsg", "Hệ thống gặp lỗi: " + e.getMessage());
+                    quayLaiCheckoutTrang(request, response, cartItems, session, voucherDAO);
+                } catch (Exception ex) {
+                    response.sendRedirect(request.getContextPath() + "/cart");
+                }
             }
         }
+    }
+
+    private void quayLaiCheckoutTrang(HttpServletRequest request, HttpServletResponse response, 
+            List<CartItem> cartItems, HttpSession session, VoucherDAO voucherDAO) throws ServletException, IOException {
+        double totalPrice = cartItems.stream().mapToDouble(i -> i.getProduct().getPrice() * i.getQuantity()).sum();
+        double discountAmount = 0;
+        String appliedVouchers = (String) session.getAttribute("checkoutVouchers");
+        if (appliedVouchers != null && !appliedVouchers.trim().isEmpty()) {
+            String[] codes = appliedVouchers.split(",");
+            int totalDiscountPercent = 0;
+            for (String code : codes) {
+                Voucher v = voucherDAO.getVoucherByCode(code.trim().toUpperCase());
+                if (v != null) { totalDiscountPercent += v.getDiscountPercent(); }
+            }
+            if (totalDiscountPercent > 100) totalDiscountPercent = 100;
+            discountAmount = totalPrice * totalDiscountPercent / 100;
+            totalPrice = totalPrice - discountAmount;
+        }
+        request.setAttribute("cartItems", cartItems);
+        request.setAttribute("totalPrice", totalPrice);
+        request.setAttribute("discountAmount", discountAmount);
+        request.getRequestDispatcher("/WEB-INF/views/client/order/checkout.jsp").forward(request, response);
     }
 }

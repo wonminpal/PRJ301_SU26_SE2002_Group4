@@ -36,8 +36,7 @@
                                 <td>${order.shippingPhone}</td>
                                 <!-- CỘT TỔNG TIỀN (Sử dụng fmt đúng cách) -->
                                 <td class="text-danger fw-bold">
-                                    <fmt:formatNumber value="${order.finalAmount}" pattern="#,###"/>₫
-                                </td>
+                                    <fmt:formatNumber value="${order.finalAmount}" type="number" pattern="#,###" />đ                                </td>
                                 <td>
                                     <c:choose>
                                         <c:when test="${order.status eq 'Chờ xác nhận'}">
