@@ -1,10 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.UserDAO;
+import dao.VoucherDAO; 
 import model.User;
 import java.io.IOException;
 
@@ -56,6 +53,11 @@ public class AuthServlet extends HttpServlet {
             if (user != null) {
                 HttpSession session = request.getSession();
                 session.setAttribute("account", user);
+
+                // 🔴 KHÚC NÀY NÈ: Đếm số lượng voucher khả dụng đưa vào session
+                VoucherDAO voucherDAO = new VoucherDAO();
+                int voucherCount = voucherDAO.getAvailableVouchersCount();
+                session.setAttribute("voucherCount", voucherCount);
 
                 response.sendRedirect(request.getContextPath() + "/home");
             } else {
