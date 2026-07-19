@@ -11,6 +11,23 @@
             <small class="text-muted">Cập nhật thông tin chi tiết mã sản phẩm: #${product.id}</small>
         </div>
 
+        <c:if test="${param.error == 'empty_name'}">
+            <div class="alert alert-danger py-2 fw-bold shadow-sm mb-3">
+                ⚠ Lỗi: Tên sản phẩm không được bỏ trống!
+            </div>
+        </c:if>
+
+        <c:if test="${param.error == 'duplicate_name'}">
+            <div class="alert alert-warning py-2 fw-bold shadow-sm mb-3">
+                ⚠ Lỗi: Tên sản phẩm này đã được sử dụng (trùng đường dẫn URL)! Vui lòng nhập tên khác.
+            </div>
+        </c:if>
+
+        <c:if test="${param.error == 'exception'}">
+            <div class="alert alert-danger py-2 shadow-sm mb-3">
+                ⚠ Lỗi hệ thống: Không thể thực hiện thao tác lúc này!
+            </div>
+        </c:if>
         <!-- Form cập nhật, gửi kèm action=update và type=product -->
         <form action="${pageContext.request.contextPath}/adminProduct?action=update&type=product" method="post" id="productForm">
             <!-- Thẻ ẩn (hidden) lưu ID sản phẩm phục vụ cho câu lệnh WHERE trong SQL -->

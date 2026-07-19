@@ -27,17 +27,29 @@
         </c:if>
 
         <form action="${pageContext.request.contextPath}/adminCategory?action=add" method="post">
-            <div class="mb-4">
-                <label class="form-label fw-bold text-secondary">Tên danh mục</label>
-                <input type="text" name="name" class="form-control form-control-lg fs-6" 
-                       placeholder="Nhập tên (Ví dụ: Điện thoại, Laptop, Phụ kiện...)" required autofocus>
+
+            <!-- Ô nhập Tên danh mục (Chắc em đã có sẵn) -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Tên danh mục mới</label>
+                <input type="text" name="name" class="form-control" required placeholder="Ví dụ: Laptop Gaming">
             </div>
 
-            <div class="d-flex gap-2 justify-content-end pt-3 border-top">
-                <!-- Nút Hủy quay trở lại trang tổng quan kho hàng -->
-                <a href="${pageContext.request.contextPath}/adminProduct?action=list" class="btn btn-light fw-bold px-3">Hủy Bỏ</a>
-                <button type="submit" class="btn btn-success px-4 fw-bold shadow-sm">Lưu Danh Mục</button>
+            <!-- THÊM Ô CHỌN DANH MỤC CHA VÀO ĐÂY -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Trực thuộc danh mục cha</label>
+                <select name="parentId" class="form-select shadow-sm">
+                    <option value="0">-- 🌟 Đặt làm danh mục gốc (Level 1) --</option>
+
+                    <!-- Vòng lặp in ra các danh mục cha lấy từ Servlet -->
+                    <c:forEach items="${parentCategories}" var="pCat">
+                        <option value="${pCat.id}">📁 ${pCat.name}</option>
+                    </c:forEach>
+                </select>
+                <small class="text-muted">Chọn "Đặt làm danh mục gốc" nếu đây là danh mục lớn (như Laptop, Điện thoại).</small>
             </div>
+
+            <button type="submit" class="btn btn-success fw-bold px-4">Lưu Danh Mục</button>
+            <a href="${pageContext.request.contextPath}/adminProduct?action=list" class="btn btn-secondary">Hủy bỏ</a>
         </form>
     </div>
 </div>

@@ -12,11 +12,36 @@
 <jsp:include page="/WEB-INF/views/include/header.jsp" />
 
 <div class="container mt-5 mb-5">
+    <c:if test="${param.error == 'category_in_use'}">
+        <div class="alert alert-danger py-2 fw-bold shadow-sm">
+            ⚠ Lỗi: Không thể ẩn danh mục này vì vẫn còn sản phẩm thuộc danh mục đang được bán!
+        </div>
+    </c:if>   
+    <c:if test="${param.error == 'empty_name'}">
+        <div class="alert alert-danger py-2 fw-bold shadow-sm mb-3">
+            ⚠ Lỗi: Tên sản phẩm không được bỏ trống!
+        </div>
+    </c:if>
+
+    <c:if test="${param.error == 'duplicate_name'}">
+        <div class="alert alert-warning py-2 fw-bold shadow-sm mb-3">
+            ⚠ Lỗi: Tên sản phẩm này đã được sử dụng (trùng đường dẫn URL)! Vui lòng nhập tên khác.
+        </div>
+    </c:if>
+
+    <c:if test="${param.error == 'exception'}">
+        <div class="alert alert-danger py-2 shadow-sm mb-3">
+            ⚠ Lỗi hệ thống: Không thể thực hiện thao tác lúc này!
+        </div>
+    </c:if>
+
     <div class="d-flex justify-content-between align-items-center mb-3 bg-white p-3 rounded shadow-sm">
         <div>
             <h2 class="fw-bold text-dark m-0">Quản Lý Kho Hàng Tổng Hợp</h2>
             <small class="text-muted">Quản lý kho hàng và danh mục phân loại</small>
         </div>
+
+
         <div class="dropdown">
             <button class="btn btn-primary btn-lg dropdown-toggle fw-bold shadow-sm" type="button" id="adminAddDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 + Thêm Mới
@@ -37,9 +62,9 @@
                 </li>
             </ul>
         </div>
-
     </div>
 </div>
+
 
 <div class="row g-4 container-fluid px-4">
 
@@ -122,7 +147,10 @@
         <div class="card shadow-sm border-0">
             <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
                 <h5 class="m-0 fw-bold">📁 CÁC DANH MỤC</h5>
-                <a href="${pageContext.request.contextPath}/adminCategory?action=add" class="btn btn-sm btn-light fw-bold text-success">+ Thêm</a>
+                <div>
+                    <a href="${pageContext.request.contextPath}/adminProduct?action=list" class="btn btn-sm btn-warning fw-bold text-dark me-1">Tất cả SP</a>
+                    <a href="${pageContext.request.contextPath}/adminCategory?action=add" class="btn btn-sm btn-light fw-bold text-success">+ Thêm</a>
+                </div>
             </div>
             <div class="card-body p-0">
                 <table class="table table-hover mb-0 align-middle">
@@ -139,10 +167,12 @@
                                 <td>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <span class="fw-bold text-dark">${cat.name}</span>
+                                            <a href="${pageContext.request.contextPath}/adminProduct?action=list&categoryId=${cat.id}" 
+                                               class="fw-bold text-decoration-none ${currentCategoryId == cat.id ? 'text-primary fs-5' : 'text-dark'}">
+                                                ${cat.name}
+                                            </a>
                                             <small class="text-muted d-block" style="font-size: 11px;">Slug: ${cat.slug}</small>
 
-                                            <!-- Hiển thị trạng thái Hoạt động / Đã ẩn -->
                                             <c:choose>
                                                 <c:when test="${cat.status}">
                                                     <span class="badge bg-success" style="font-size: 10px;">Hoạt động</span>

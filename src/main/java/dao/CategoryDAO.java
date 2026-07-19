@@ -88,17 +88,22 @@ public class CategoryDAO extends DBContext {
         return null;
     }
 
-    public boolean addCategory(String name, String slug) {
-        String sql = "INSERT INTO Categories (name, slug) VALUES (?, ?)";
-        try (PreparedStatement ps = this.getConnection().prepareStatement(sql);) {
+    public boolean addCategory(String name, String slug, int parentId) {
+        String sql = "INSERT INTO Categories (name, slug, parent_id) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = this.getConnection().prepareStatement(sql)) {
 
             ps.setString(1, name);
             ps.setString(2, slug);
 
+            if (parentId > 0) {
+                ps.setInt(3, parentId);
+            } else {
+                ps.setNull(3, java.sql.Types.INTEGER);
+            }
+
             return ps.executeUpdate() > 0;
         } catch (java.sql.SQLException ex) {
-            Logger.getLogger(CategoryDAO.class.getName()).log(Level.SEVERE, null, ex);
-            System.err.println("Lỗi tại insertCategory: " + ex.getMessage());
+            ex.printStackTrace();
         }
         return false;
     }
@@ -194,5 +199,45 @@ public class CategoryDAO extends DBContext {
             Logger.getLogger(CategoryDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
+    }
+
+    public boolean hasDependencies(int categoryId) {
+        String sql = "SELECT "
+                + "  (SELECT COUNT(*) FROM Products WHERE category_id = ? AND status = 1) "
+                + "  + "
+                + "  (SELECT COUNT(*) FROM Categories WHERE parent_id = ? AND status = 1) AS TotalDependencies";
+
+        try (PreparedStatement ps = this.getConnection().prepareStatement(sql)) {
+
+            ps.setInt(1, categoryId);
+            ps.setInt(2, categoryId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("TotalDependencies") > 0;
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+
+    public List<Category> getParentCategories() {
+        List<Category> list = new ArrayList<>();
+        String sql = "SELECT * FROM Categories WHERE parent_id IS NULL AND status = 1 ORDER BY id ASC";
+        try (java.sql.Connection conn = this.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Category c = new Category();
+                c.setId(rs.getInt("id"));
+                c.setName(rs.getString("name"));
+                c.setSlug(rs.getString("slug"));
+                list.add(c);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return list;
     }
 }
