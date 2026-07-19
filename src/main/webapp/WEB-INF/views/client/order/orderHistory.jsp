@@ -1,8 +1,3 @@
-Dưới đây là mã nguồn hoàn chỉnh của file orderHistory.jsp đã được căn giữa toàn bộ dữ liệu cột "Địa chỉ giao hàng" (text-center), sửa lỗi hiển thị tiền tệ khoa học, khớp chuẩn tên các biến từ Database (finalAmount, shippingAddress, shippingPhone, createdAt) và có giao diện Bootstrap cực kỳ sạch đẹp cho bạn.
-
-Bạn mở file orderHistory.jsp ra, xóa hết code cũ và dán đè toàn bộ đoạn này vào nhé:
-
-HTML
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
@@ -22,7 +17,7 @@ HTML
                 <a href="${pageContext.request.contextPath}/" class="btn btn-primary fw-bold">MUA SẮM NGAY</a>
             </div>
         </c:when>
-        
+
         <%-- TRƯỜNG HỢP: CÓ DANH SÁCH ĐƠN HÀNG --%>
         <c:otherwise>
             <div class="table-responsive bg-white rounded shadow-sm p-3">
@@ -42,23 +37,23 @@ HTML
                             <tr>
                                 <!-- 1. Mã Đơn -->
                                 <td class="fw-bold text-secondary">#ORD-${order.id}</td>
-                                
+
                                 <!-- 2. Ngày đặt -->
                                 <td>
                                     <fmt:formatDate value="${order.createdAt}" pattern="dd/MM/yyyy HH:mm" />
                                 </td>
-                                
+
                                 <!-- 3. Địa chỉ giao hàng (Đã căn giữa hoàn toàn) -->
                                 <td class="text-center">${order.shippingAddress}</td>
-                                
+
                                 <!-- 4. Số điện thoại -->
                                 <td>${order.shippingPhone}</td>
-                                
+
                                 <!-- 5. Tổng tiền (Đã sửa hiển thị giá trị sau khi giảm giá của Voucher) -->
                                 <td class="text-danger fw-bold">
                                     <fmt:formatNumber value="${order.finalAmount}" type="number" pattern="#,###" />đ
                                 </td>
-                                
+
                                 <!-- 6. Trạng thái đơn hàng kèm Badge màu sắc sinh động -->
                                 <td>
                                     <c:choose>
