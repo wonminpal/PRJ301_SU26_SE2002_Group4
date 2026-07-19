@@ -81,6 +81,15 @@
                                             </a>
                                         </li>
 
+                                        <%-- Nếu là Admin (role=1) thì hiện link quay về Trang Quản Trị --%>
+                                        <c:if test="${sessionScope.account.role == 1}">
+                                            <li>
+                                                <a class="dropdown-item" href="${pageContext.request.contextPath}/admin/dashboard">
+                                                    <i class="fa-solid fa-gauge-high me-2 text-primary"></i>Trang quản trị
+                                                </a>
+                                            </li>
+                                        </c:if>
+
                                         <!-- THÀNH PHẦN MỚI: Ô hiện thông báo Voucher trong menu thả xuống -->
                                         <li>
                                             <a class="dropdown-item d-flex justify-content-between align-items-center" href="${pageContext.request.contextPath}/voucher">
