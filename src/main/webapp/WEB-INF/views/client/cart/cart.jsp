@@ -31,7 +31,7 @@
                             <td><img src="${item.product.imageUrl}" width="70" alt="${item.product.name}"></td>
                             <td class="text-start fw-bold">${item.product.name}</td>
                             <td class="align-middle fw-bold text-danger">
-                                <fmt:formatNumber value="${item.product.displayPrice}" pattern="#,###"/>₫
+                                <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###" />đ
                             </td>
                             <td>
                                 <form action="${pageContext.request.contextPath}/cart" method="post" class="d-flex justify-content-center">
@@ -49,7 +49,6 @@
                                 <a href="${pageContext.request.contextPath}/cart?action=remove&id=${item.product.id}&variant=${item.variant}" class="btn btn-sm btn-outline-danger">Xóa</a>
                             </td>
                         </tr>
-        
 
                         <c:set var="totalPrice" value="${totalPrice + (item.product.displayPrice * item.quantity)}" />
 
@@ -66,7 +65,7 @@
                             <input type="text" id="voucherInput" class="form-control text-uppercase" placeholder="Nhập mã..." autocomplete="off" onfocus="showVoucherHistory()">
                             <button type="button" id="btnApplyVoucher" class="btn btn-danger fw-bold" onclick="applyVoucher()">Áp dụng</button>
                         </div>
-                        
+
                         <!-- DANH SÁCH GỢI Ý MÃ ĐÃ NHẬP (Dropdown History) -->
                         <div id="voucherHistoryDropdown" class="list-group shadow-sm position-absolute w-100" 
                              style="display: none; top: 100%; left: 0; z-index: 1050; max-height: 200px; overflow-y: auto; padding: 0 15px; margin-top: 5px;">
@@ -116,29 +115,34 @@
         var history = JSON.parse(localStorage.getItem("voucherHistory")) || [];
         var dropdown = document.getElementById("voucherHistoryDropdown");
         var container = document.getElementById("historyItemsContainer");
-        
+
         if (history.length === 0) {
             dropdown.style.display = "none";
             return;
         }
-        
+
         var html = "";
         history.forEach(function (code) {
-            var isApplied = activeVouchers.some(function(v) { return v.code === code; });
+            var isApplied = activeVouchers.some(function (v) {
+                return v.code === code;
+            });
             var badge = isApplied ? '<span class="badge bg-success">Đang dùng</span>' : '';
-            
+
             html += '<div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2" style="cursor: pointer;">' +
                     '  <span onclick="selectVoucher(\'' + code + '\')" class="w-100 fw-bold ' + (isApplied ? 'text-muted' : 'text-dark') + '">' + code + ' ' + badge + '</span>' +
                     '  <button type="button" class="btn-close small" style="font-size: 10px;" onclick="deleteVoucherHistory(\'' + code + '\', event)"></button>' +
                     '</div>';
         });
-        
+
         container.innerHTML = html;
         dropdown.style.display = "block";
     }
 
     function selectVoucher(code) {
-        if (activeVouchers.some(function(v) { return v.code === code; })) return;
+        if (activeVouchers.some(function (v) {
+            return v.code === code;
+        }))
+            return;
         document.getElementById("voucherInput").value = code;
         document.getElementById("voucherHistoryDropdown").style.display = "none";
     }
@@ -146,7 +150,9 @@
     function deleteVoucherHistory(code, event) {
         event.stopPropagation();
         var history = JSON.parse(localStorage.getItem("voucherHistory")) || [];
-        history = history.filter(function(item) { return item !== code; });
+        history = history.filter(function (item) {
+            return item !== code;
+        });
         localStorage.setItem("voucherHistory", JSON.stringify(history));
         showVoucherHistory();
     }
@@ -172,41 +178,46 @@
             return;
         }
 
-        if (activeVouchers.some(function(v) { return v.code === voucherCode; })) {
+        if (activeVouchers.some(function (v) {
+            return v.code === voucherCode;
+        })) {
             messageDiv.style.display = "block";
             messageDiv.className = "small fw-bold mt-2 text-warning";
             messageDiv.innerText = "Mã này đang được áp dụng rồi!";
             return;
         }
 
+        // 🔴 ĐÃ CẬP NHẬT: Gửi thêm orderAmount = originalPrice lên Servlet để check min_order_value
         fetch("${pageContext.request.contextPath}/voucher?action=apply", {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "code=" + encodeURIComponent(voucherCode)
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: "code=" + encodeURIComponent(voucherCode) + "&orderAmount=" + originalPrice
         })
-        .then(function(response) { return response.json(); })
-        .then(function(data) {
-            messageDiv.style.display = "block";
-            if (data.status === "success") {
-                // Thêm mã mới vào danh sách đang áp dụng
-                activeVouchers.push({
-                    code: voucherCode,
-                    discount: data.discountPercent
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    messageDiv.style.display = "block";
+                    if (data.status === "success") {
+                        // Thêm mã mới vào danh sách đang áp dụng
+                        activeVouchers.push({
+                            code: voucherCode,
+                            discount: data.discountPercent
+                        });
+
+                        // Tính lại giá và cập nhật giao diện hiển thị các tag mã
+                        updateCartSummary();
+                        saveToHistory(voucherCode);
+
+                        voucherInput.value = ""; // Dọn sạch ô nhập để sẵn sàng nhập mã tiếp theo
+                    } else {
+                        messageDiv.className = "small fw-bold mt-2 text-danger";
+                        messageDiv.innerText = data.message;
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Error:", error);
                 });
-                
-                // Tính lại giá và cập nhật giao diện hiển thị các tag mã
-                updateCartSummary();
-                saveToHistory(voucherCode);
-                
-                voucherInput.value = ""; // Dọn sạch ô nhập để sẵn sàng nhập mã tiếp theo
-            } else {
-                messageDiv.className = "small fw-bold mt-2 text-danger";
-                messageDiv.innerText = data.message;
-            }
-        })
-        .catch(function(error) {
-            console.error("Error:", error);
-        });
     }
 
     // Cập nhật lại tổng số tiền và render danh sách tag Voucher đang hoạt động
@@ -224,27 +235,32 @@
         }
 
         // Tính tổng phần trăm giảm giá tích lũy từ các mã
-        var totalDiscountPercent = activeVouchers.reduce(function(sum, v) { return sum + v.discount; }, 0);
-        if (totalDiscountPercent > 100) totalDiscountPercent = 100;
+        var totalDiscountPercent = activeVouchers.reduce(function (sum, v) {
+            return sum + v.discount;
+        }, 0);
+        if (totalDiscountPercent > 100)
+            totalDiscountPercent = 100;
 
         // Tính toán lại giá trị thanh toán mới sau khi giảm
         var finalPrice = originalPrice - (originalPrice * totalDiscountPercent / 100);
         priceDisplay.innerText = finalPrice.toLocaleString('vi-VN') + "₫";
 
         // Gộp các mã thành chuỗi phân tách bằng dấu phẩy (Ví dụ: "PRJ10,SAMSUNG20") gửi lên Controller
-        hiddenInput.value = activeVouchers.map(function(v) { return v.code; }).join(",");
+        hiddenInput.value = activeVouchers.map(function (v) {
+            return v.code;
+        }).join(",");
 
         // Tạo giao diện các khối tag Voucher có nút hủy nhanh từng mã
         var tagsHtml = '<div class="mt-2 fw-bold text-secondary small">Mã đang dùng (Cộng dồn): </div>' +
-                       '<div class="d-flex flex-wrap gap-1 mt-1">';
-        activeVouchers.forEach(function(v, index) {
-            tagsHtml += '<span class="badge bg-danger d-flex align-items-center gap-1 py-1 px-2 text-white">' + 
-                        v.code + ' (-' + v.discount + '%)' +
-                        '<span style="cursor:pointer; font-size: 14px; font-weight:bold; margin-left: 5px;" onclick="removeSpecificVoucher(' + index + ')">&times;</span>' +
-                        '</span>';
+                '<div class="d-flex flex-wrap gap-1 mt-1">';
+        activeVouchers.forEach(function (v, index) {
+            tagsHtml += '<span class="badge bg-danger d-flex align-items-center gap-1 py-1 px-2 text-white">' +
+                    v.code + ' (-' + v.discount + '%)' +
+                    '<span style="cursor:pointer; font-size: 14px; font-weight:bold; margin-left: 5px;" onclick="removeSpecificVoucher(' + index + ')">&times;</span>' +
+                    '</span>';
         });
         tagsHtml += '</div>';
-        
+
         messageDiv.innerHTML = tagsHtml;
         messageDiv.style.display = "block";
     }

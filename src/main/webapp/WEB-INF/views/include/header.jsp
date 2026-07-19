@@ -35,7 +35,7 @@
 
         <nav class="navbar navbar-expand-lg navbar-dark bg-danger mb-4 shadow">
             <div class="container">
-                
+
                 <a class="navbar-brand fw-bold fs-4" href="${pageContext.request.contextPath}/home">
                     <i class="fa-solid fa-shop me-2"></i>Trang Chủ
                 </a>
@@ -46,8 +46,8 @@
 
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
-                        </ul>
-                    
+                    </ul>
+
                     <form class="d-flex mx-auto position-relative" action="${pageContext.request.contextPath}/home" method="get" style="width: 450px;">
                         <input class="form-control rounded-pill pe-5" type="search" name="keyword" placeholder="Nhập tên điện thoại, laptop, phụ kiện..." value="${keyword}">
                         <button class="btn border-0 position-absolute end-0 top-50 translate-middle-y text-danger" type="submit">
@@ -75,9 +75,30 @@
                                         <i class="fa-solid fa-circle-user fs-5 align-middle"></i> ${sessionScope.account.fullName}
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/profile">Thông tin tài khoản</a></li>
+                                        <li>
+                                            <a class="dropdown-item" href="${pageContext.request.contextPath}/profile">
+                                                <i class="fa-solid fa-user-gear me-2 text-muted"></i>Thông tin tài khoản
+                                            </a>
+                                        </li>
+
+                                        <!-- THÀNH PHẦN MỚI: Ô hiện thông báo Voucher trong menu thả xuống -->
+                                        <li>
+                                            <a class="dropdown-item d-flex justify-content-between align-items-center" href="${pageContext.request.contextPath}/voucher">
+                                                <span><i class="fa-solid fa-ticket text-danger me-2"></i>Voucher của tôi</span>
+
+                                                <!-- Sử dụng c:choose để nếu bằng 0 thì không hiện badge, hoặc hiện số chuẩn từ session -->
+                                                <span class="badge bg-danger">
+                                                    ${not empty sessionScope.voucherCount ? sessionScope.voucherCount : 0}
+                                                </span>
+                                            </a>
+                                        </li>
+
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item text-danger fw-bold" href="${pageContext.request.contextPath}/auth?action=logout">Đăng xuất</a></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger fw-bold" href="${pageContext.request.contextPath}/auth?action=logout">
+                                                <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
+                                            </a>
+                                        </li>
                                     </ul>
                                 </li>
                             </c:when>
