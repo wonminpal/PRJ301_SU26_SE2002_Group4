@@ -1,6 +1,7 @@
 package controller;
 
 import dao.UserDAO;
+import dao.VoucherDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,11 +19,6 @@ import model.User;
 public class AuthServlet extends HttpServlet {
 
     private UserDAO userDao;
-
-    @Override
-    public void init() {
-        userDao = new UserDAO();
-    }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
@@ -42,7 +38,7 @@ public class AuthServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("action");
-
+        UserDAO userDao = new UserDAO();
         if ("login".equals(action) || "signin".equals(action)) {
             String email = request.getParameter("email");
             String password = request.getParameter("password");
@@ -56,8 +52,14 @@ public class AuthServlet extends HttpServlet {
                 VoucherDAO voucherDAO = new VoucherDAO();
                 int voucherCount = voucherDAO.getAvailableVouchersCount();
                 session.setAttribute("voucherCount", voucherCount);
+                if (user.getRole() == 1) {
+                    // Nếu là Admin -> Bay thẳng vào trang Dashboard Thống kê
+                    response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+                } else {
+                    // Nếu là User bình thường -> Bay ra trang chủ mua sắm
+                    response.sendRedirect(request.getContextPath() + "/home");
+                }
 
-                response.sendRedirect(request.getContextPath() + "/home");
             } else {
                 request.setAttribute("errorMessage", "Email hoặc mật khẩu không chính xác!");
                 request.getRequestDispatcher("/WEB-INF/views/account/login.jsp").forward(request, response);

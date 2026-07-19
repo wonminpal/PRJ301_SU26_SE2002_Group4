@@ -23,12 +23,24 @@
         <div class="col-md-9">
             <div class="card shadow border-0">
                 <div class="card-header bg-white border-bottom pt-4 pb-0">
+                    <style>
+                        /* Tab profile: chỉ gạch chân đậm khi active */
+                        #profileTabs .nav-link {
+                            border: none !important;
+                            border-bottom: 3px solid transparent !important;
+                            color: #6c757d;
+                        }
+                        #profileTabs .nav-link.active {
+                            border-bottom: 3px solid #212529 !important;
+                            color: #212529 !important;
+                        }
+                    </style>
                     <ul class="nav nav-tabs border-0" id="profileTabs">
                         <li class="nav-item">
-                            <a class="nav-link active text-dark fw-bold border-0 border-bottom border-dark border-3" data-bs-toggle="tab" href="#info">Thông tin cá nhân</a>
+                            <a class="nav-link active fw-bold" data-bs-toggle="tab" href="#info">Thông tin cá nhân</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-muted fw-bold border-0" data-bs-toggle="tab" href="#security">Bảo mật</a>
+                            <a class="nav-link fw-bold" data-bs-toggle="tab" href="#security">Bảo mật</a>
                         </li>
                     </ul>
                 </div>
