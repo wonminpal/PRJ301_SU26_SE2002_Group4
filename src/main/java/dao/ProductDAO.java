@@ -383,9 +383,9 @@ public class ProductDAO extends DBContext {
         String sql = "INSERT INTO Products (category_id, name, description, price, brand, image_url, slug, stock_quantity, status, created_at) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
 
-        try {
-            // Sử dụng RETURN_GENERATED_KEYS để lấy ID tự động sinh ra
-            PreparedStatement statement = this.getConnection().prepareStatement(sql);
+        // FIX 1: Thêm cờ java.sql.Statement.RETURN_GENERATED_KEYS để lấy ID tự tăng
+        // FIX 2: Bọc PreparedStatement vào try-with-resources để tự động đóng
+        try (PreparedStatement statement = this.getConnection().prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setInt(1, p.getCategoryId());
             statement.setString(2, p.getName());
@@ -399,25 +399,25 @@ public class ProductDAO extends DBContext {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                ResultSet rs = statement.getGeneratedKeys();
-                if (rs.next()) {
-                    return rs.getInt(1); // Trả về ID của sản phẩm mới chèn
+                // Lấy ID vừa được tạo ra
+                try (ResultSet rs = statement.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1); // Trả về ID của sản phẩm mới chèn
+                    }
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
             System.err.println("Lỗi tại insertProduct: " + ex.getMessage());
         }
         return 0;
     }
 
-    // Hàm cập nhật thông tin sản phẩm theo ID
     public boolean updateProduct(Product p) {
         String sql = "UPDATE Products SET category_id = ?, name = ?, description = ?, price = ?, "
-                + "brand = ?, image_url = ?, slug = ?, status = ? WHERE id = ?";
+                + "brand = ?, image_url = ?, slug = ?, stock_quantity = ?, status = ? WHERE id = ?";
 
-        try {
-            PreparedStatement statement = this.getConnection().prepareStatement(sql);
+        try (PreparedStatement statement = this.getConnection().prepareStatement(sql)) {
 
             statement.setInt(1, p.getCategoryId());
             statement.setString(2, p.getName());
@@ -432,7 +432,7 @@ public class ProductDAO extends DBContext {
 
             return statement.executeUpdate() > 0;
         } catch (SQLException ex) {
-            Logger.getLogger(ProductDAO.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
             System.err.println("Lỗi tại updateProduct: " + ex.getMessage());
         }
         return false;
@@ -585,5 +585,79 @@ public class ProductDAO extends DBContext {
         }
 
         return false;
+    }
+
+    public boolean checkProductSlugExist(String slug) {
+        String sql = "SELECT COUNT(*) FROM Products WHERE slug = ?";
+        try (PreparedStatement ps = this.getConnection().prepareStatement(sql)) {
+            ps.setString(1, slug.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean checkProductSlugExistForUpdate(int id, String slug) {
+        String sql = "SELECT COUNT(*) FROM Products WHERE slug = ? AND id <> ?";
+        try (PreparedStatement ps = this.getConnection().prepareStatement(sql)) {
+            ps.setString(1, slug.trim());
+            ps.setInt(2, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+
+    public List<Product> getAdminProducts(int categoryId) {
+        List<Product> list = new ArrayList<>();
+
+        // Khởi tạo câu query gốc
+        String sql = "SELECT p.id, p.name, p.description, p.slug, p.brand, p.category_id, p.status, "
+                + "(SELECT MIN(price) FROM Product_Variants WHERE product_id = p.id) AS display_price, "
+                + "(SELECT TOP 1 image_url FROM Product_Images WHERE product_id = p.id AND is_thumbnail = 1) AS display_image "
+                + "FROM Products p ";
+
+        // Nếu categoryId > 0 tức là Admin đang muốn lọc
+        if (categoryId > 0) {
+            sql += "WHERE p.category_id = ? ";
+        }
+
+        sql += "ORDER BY p.created_at DESC";
+
+        try (java.sql.Connection conn = this.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            if (categoryId > 0) {
+                ps.setInt(1, categoryId);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Product p = new Product();
+                    p.setId(rs.getInt("id"));
+                    p.setCategoryId(rs.getInt("category_id"));
+                    p.setName(rs.getString("name"));
+                    p.setDescription(rs.getString("description"));
+                    p.setBrand(rs.getString("brand"));
+                    p.setSlug(rs.getString("slug"));
+                    p.setStatus(rs.getInt("status"));
+                    p.setDisplayPrice(rs.getDouble("display_price"));
+                    p.setDisplayImageUrl(rs.getString("display_image"));
+                    list.add(p);
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return list;
     }
 }

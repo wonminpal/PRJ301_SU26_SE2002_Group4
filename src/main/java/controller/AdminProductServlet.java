@@ -37,9 +37,20 @@ public class AdminProductServlet extends HttpServlet {
             }
 
             if (action.equals("list")) {
-                List<Product> productList = productDAO.getLatestProducts(8, true);
+                int filterCategoryId = 0;
+                String catIdParam = request.getParameter("categoryId");
+                if (catIdParam != null && !catIdParam.isEmpty()) {
+                    try {
+                        filterCategoryId = Integer.parseInt(catIdParam);
+                    } catch (NumberFormatException e) {
+                        filterCategoryId = 0;
+                    }
+                }
+
+                List<Product> productList = productDAO.getAdminProducts(filterCategoryId);
                 List<Category> categoryList = categoryDAO.getAllCategories();
 
+                request.setAttribute("currentCategoryId", filterCategoryId);
                 request.setAttribute("adminProductList", productList);
                 request.setAttribute("adminCategoryList", categoryList);
 
@@ -79,11 +90,9 @@ public class AdminProductServlet extends HttpServlet {
                 try {
                     int id = Integer.parseInt(request.getParameter("id"));
 
-                    // Gọi hàm phục hồi status = 1 trong DAO
                     boolean isRestored = productDAO.restoreProduct(id);
 
                     if (isRestored) {
-                        // Khôi phục thành công, quay về trang list kèm thông báo thành công
                         response.sendRedirect(request.getContextPath() + "/adminProduct?action=list&message=restore_success");
                     } else {
                         response.sendRedirect(request.getContextPath() + "/adminProduct?action=list&error=restore_fail");
@@ -109,7 +118,6 @@ public class AdminProductServlet extends HttpServlet {
 
         if (action.equals("add")) {
             try {
-                // --- BƯỚC 2.1: LẤY THÔNG TIN SẢN PHẨM GỐC ---
                 int categoryId = Integer.parseInt(request.getParameter("categoryId"));
                 String name = request.getParameter("name");
                 String brand = request.getParameter("brand");
@@ -117,7 +125,6 @@ public class AdminProductServlet extends HttpServlet {
                 double price = Double.parseDouble(request.getParameter("price"));
                 String displayImageUrl = request.getParameter("displayImageUrl");
 
-                // --- BƯỚC 2.2: RÀNG BUỘC CHẶN GIÁ TRỊ ÂM PHÍA BACK-END ---
                 if (categoryId <= 0) {
                     response.sendRedirect(request.getContextPath() + "/adminProduct?action=add&error=invalid_category");
                     return;
@@ -127,10 +134,15 @@ public class AdminProductServlet extends HttpServlet {
                     return;
                 }
 
-                // Tự động tạo slug gạch ngang từ tên sản phẩm để tối ưu SEO[cite: 4, 5]
                 String slug = name.toLowerCase().replaceAll("[^a-z0-9\\s]", "").replaceAll("\\s+", "-");
 
-                // Đóng gói dữ liệu Product cha
+                ProductDAO productDAO = new ProductDAO();
+
+                if (productDAO.checkProductSlugExist(slug)) {
+                    response.sendRedirect(request.getContextPath() + "/adminProduct?action=add&error=duplicate_name");
+                    return;
+                }
+
                 Product p = new Product();
                 p.setCategoryId(categoryId);
                 p.setName(name);
@@ -158,10 +170,8 @@ public class AdminProductServlet extends HttpServlet {
 
                     if (colors != null) {
                         for (int i = 0; i < colors.length; i++) {
-                            // Bỏ qua dòng trống nếu Admin lỡ bấm thêm dòng mà không gõ chữ
                             if (colors[i] != null && !colors[i].trim().isEmpty()) {
 
-                                // Ràng buộc kiểm tra số âm cho từng dòng biến thể
                                 double vPrice = (prices[i] != null && !prices[i].isEmpty()) ? Double.parseDouble(prices[i]) : price;
                                 int vStock = (stocks[i] != null && !stocks[i].isEmpty()) ? Integer.parseInt(stocks[i]) : 0;
 
@@ -211,7 +221,6 @@ public class AdminProductServlet extends HttpServlet {
                 double price = Double.parseDouble(request.getParameter("price"));
                 String displayImageUrl = request.getParameter("displayImageUrl");
 
-                // Ràng buộc số âm ở Back-end
                 if (categoryId <= 0 || price < 0) {
                     response.sendRedirect(request.getContextPath() + "/adminProduct?action=edit&id=" + productId + "&error=invalid_value");
                     return;
@@ -219,7 +228,13 @@ public class AdminProductServlet extends HttpServlet {
 
                 String slug = name.toLowerCase().replaceAll("[^a-z0-9\\s]", "").replaceAll("\\s+", "-");
 
-                // Cập nhật thực thể cha
+                ProductDAO productDAO = new ProductDAO();
+
+                if (productDAO.checkProductSlugExistForUpdate(productId, slug)) {
+                    response.sendRedirect(request.getContextPath() + "/adminProduct?action=edit&id=" + productId + "&error=duplicate_name");
+                    return;
+                }
+
                 Product p = new Product();
                 p.setId(productId);
                 p.setCategoryId(categoryId);
@@ -230,18 +245,19 @@ public class AdminProductServlet extends HttpServlet {
                 p.setDisplayImageUrl(displayImageUrl);
                 p.setSlug(slug);
 
+                p.setStockQuantity(0);
+                p.setStatus(1);
+
                 // Gọi DAO cập nhật Products
                 boolean isUpdated = dao.updateProduct(p);
 
                 if (isUpdated) {
-                    // Xử lý các mảng biến thể chỉnh sửa gửi lên
                     String[] colors = request.getParameterValues("colors");
                     String[] capacities = request.getParameterValues("capacities");
                     String[] prices = request.getParameterValues("prices");
                     String[] stocks = request.getParameterValues("stocks");
                     String[] variantImages = request.getParameterValues("variantImages");
 
-                    // GIẢI PHÁP ĐƠN GIẢN VÀ AN TOÀN NHẤT: Xóa sạch biến thể cũ của sản phẩm này, rồi chèn mảng mới vào
                     dao.deleteAllVariantsByProductId(productId);
 
                     if (colors != null) {

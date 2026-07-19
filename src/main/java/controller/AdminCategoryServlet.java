@@ -28,10 +28,24 @@ public class AdminCategoryServlet extends HttpServlet {
         }
 
         if (action.equals("add")) {
+
+            CategoryDAO categoryDAO = new CategoryDAO();
+            request.setAttribute("parentCategories", categoryDAO.getParentCategories());
+
             request.getRequestDispatcher("/WEB-INF/views/admin/category-add.jsp").forward(request, response);
         } else if (action.equals("edit")) {
             try {
-                int id = Integer.parseInt(request.getParameter("id"));
+                int id = 0;
+                String idParam = request.getParameter("id");
+                try {
+                    if (idParam == null || idParam.trim().isEmpty()) {
+                        throw new NumberFormatException("ID is empty");
+                    }
+                    id = Integer.parseInt(idParam.trim());
+                } catch (NumberFormatException e) {
+                    response.sendRedirect(request.getContextPath() + "/adminProduct?action=list&error=invalid_id");
+                    return;
+                }
                 CategoryDAO categoryDAO = new CategoryDAO();
                 Category category = categoryDAO.getCategoryById(id);
 
@@ -47,8 +61,25 @@ public class AdminCategoryServlet extends HttpServlet {
             }
         } else if (action.equals("delete")) {
             try {
-                int id = Integer.parseInt(request.getParameter("id"));
+                int id = 0;
+                String idParam = request.getParameter("id");
+                try {
+                    if (idParam == null || idParam.trim().isEmpty()) {
+                        throw new NumberFormatException("ID is empty");
+                    }
+                    id = Integer.parseInt(idParam.trim());
+                } catch (NumberFormatException e) {
+                    response.sendRedirect(request.getContextPath() + "/adminProduct?action=list&error=invalid_id");
+                    return;
+                }
+
                 CategoryDAO categoryDAO = new CategoryDAO();
+
+                if (categoryDAO.hasDependencies(id)) {
+                    System.out.println("Có tham số");
+                    response.sendRedirect(request.getContextPath() + "/adminProduct?action=list&error=category_in_use");
+                    return;
+                }
 
                 boolean isDeleted = categoryDAO.softDeleteCategory(id);
                 if (isDeleted) {
@@ -62,7 +93,17 @@ public class AdminCategoryServlet extends HttpServlet {
             }
         } else if (action.equals("restore")) {
             try {
-                int id = Integer.parseInt(request.getParameter("id"));
+                int id = 0;
+                String idParam = request.getParameter("id");
+                try {
+                    if (idParam == null || idParam.trim().isEmpty()) {
+                        throw new NumberFormatException("ID is empty");
+                    }
+                    id = Integer.parseInt(idParam.trim());
+                } catch (NumberFormatException e) {
+                    response.sendRedirect(request.getContextPath() + "/adminProduct?action=list&error=invalid_id");
+                    return;
+                }
                 CategoryDAO categoryDAO = new CategoryDAO();
 
                 boolean isRestored = categoryDAO.restoreCategory(id);
@@ -90,6 +131,16 @@ public class AdminCategoryServlet extends HttpServlet {
                 String name = request.getParameter("name");
                 CategoryDAO dao = new CategoryDAO();
 
+                int parentId = 0;
+                String parentIdStr = request.getParameter("parentId");
+                if (parentIdStr != null && !parentIdStr.trim().isEmpty()) {
+                    try {
+                        parentId = Integer.parseInt(parentIdStr.trim());
+                    } catch (NumberFormatException e) {
+                        parentId = 0;
+                    }
+                }
+
                 if (name == null || name.trim().isEmpty()) {
                     response.sendRedirect(request.getContextPath() + "/adminCategory?action=add&error=empty_name");
                     return;
@@ -102,7 +153,7 @@ public class AdminCategoryServlet extends HttpServlet {
 
                 String slug = name.toLowerCase().trim().replaceAll("[^a-z0-9\\s]", "").replaceAll("\\s+", "-");
 
-                boolean isSuccess = categoryDAO.addCategory(name, slug);
+                boolean isSuccess = dao.addCategory(name, slug, parentId);
 
                 if (isSuccess) {
                     response.sendRedirect(request.getContextPath() + "/adminProduct?action=list&message=category_add_success");
@@ -113,9 +164,20 @@ public class AdminCategoryServlet extends HttpServlet {
                 e.printStackTrace();
                 response.sendRedirect(request.getContextPath() + "/adminCategory?action=add&error=exception");
             }
-        } else if ("edit".equals(action)) {
+        } else if (action.equals("edit")) {
             try {
-                int id = Integer.parseInt(request.getParameter("id"));
+                int id = 0;
+                String idParam = request.getParameter("id");
+                try {
+                    if (idParam == null || idParam.trim().isEmpty()) {
+                        throw new NumberFormatException("ID is empty");
+                    }
+                    id = Integer.parseInt(idParam.trim());
+                } catch (NumberFormatException e) {
+                    response.sendRedirect(request.getContextPath() + "/adminProduct?action=list&error=invalid_id");
+                    return;
+                }
+
                 String name = request.getParameter("name");
 
                 if (name == null || name.trim().isEmpty()) {
