@@ -16,7 +16,6 @@
         
         <!-- Form trỏ về Servlet xử lý bằng phương thức POST -->
         <form action="${pageContext.request.contextPath}/adminProduct" method="post" id="productForm">
-            
             <!-- 1. KHỐI THÔNG TIN CHUNG (Chuẩn Responsive Grid) -->
             <h5 class="fw-bold text-dark mb-3">1. Thông tin cơ bản</h5>
             <div class="row">
