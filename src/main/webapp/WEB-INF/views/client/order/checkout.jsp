@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="/WEB-INF/views/include/header.jsp" />
 
 <div class="container mt-4 mb-5" style="min-height: 65vh;">
@@ -54,16 +55,35 @@
                                 <td>
                                     <span class="fw-bold text-truncate" style="max-width: 250px; display: inline-block;">${item.product.name}</span>
                                 </td>
-                                <td>$${item.product.price}</td>
+                                <td class="fw-bold">
+                                    <fmt:formatNumber value="${item.product.price}" type="number" pattern="#,###" />đ
+                                </td>
                                 <td class="fw-bold">x${item.quantity}</td>
-                                <td class="text-danger fw-bold text-end">$${item.product.price * item.quantity}</td>
+                                <td class="text-danger fw-bold text-end">
+                                    <fmt:formatNumber value="${item.product.price * item.quantity}" type="number" pattern="#,###" />đ
+                                </td>
                             </tr>
                         </c:forEach>
                     </tbody>
                 </table>
+
+                <%-- ĐÃ THÊM: Hiển thị dòng thông tin Voucher kèm số tiền được giảm trừ --%>
+                <c:if test="${not empty sessionScope.checkoutVouchers && discountAmount > 0}">
+                    <div class="p-2 mb-2 bg-light border rounded d-flex justify-content-between align-items-center">
+                        <span class="text-secondary fw-bold small">
+                            Voucher áp dụng: <span class="badge bg-danger">${sessionScope.checkoutVouchers}</span>
+                        </span>
+                        <span class="text-success fw-bold">
+                            -<fmt:formatNumber value="${discountAmount}" type="number" pattern="#,###" />đ
+                        </span>
+                    </div>
+                </c:if>
+
                 <div class="p-3 bg-light border rounded mt-3 text-end">
                     <h5 class="mb-0 fw-bold">Tổng thanh toán: 
-                        <span class="text-danger fs-4">$${totalPrice}</span>
+                        <span class="text-danger fs-4" id="totalPriceDisplay">
+                            <fmt:formatNumber value="${totalPrice}" type="number" pattern="#,###" />đ
+                        </span>
                     </h5>
                 </div>
             </div>

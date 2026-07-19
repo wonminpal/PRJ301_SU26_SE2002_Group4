@@ -1,73 +1,88 @@
 package controller;
 
 import dao.VoucherDAO;
-import model.Voucher; // Đã sửa thành model.Voucher theo đúng dự án của bạn
+import model.Voucher;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Date;
+import java.sql.Timestamp;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
-@WebServlet(name = "VoucherServlet", urlPatterns = {"/admin/voucher", "/voucher"})
+@WebServlet(name = "VoucherServlet", urlPatterns = {"/voucher"})
 public class VoucherServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Có thể để trống hoặc dùng để điều hướng sang trang JSP nếu cần
+
+        VoucherDAO voucherDAO = new VoucherDAO();
+        java.util.List<model.Voucher> listVouchers = voucherDAO.getAllVouchers();
+
+        // Lấy thời gian hiện tại của hệ thống để so sánh bằng Java
+        java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
+        int availableCount = 0;
+
+        // Vòng lặp đếm các voucher thực sự hợp lệ
+        if (listVouchers != null) {
+            for (model.Voucher v : listVouchers) {
+                if (v.getUsedCount() < v.getUsageLimit() && (v.getExpiryDate() == null || v.getExpiryDate().after(now))) {
+                    availableCount++;
+                }
+            }
+        }
+
+        // Gửi dữ liệu xuống trang voucher.jsp
+        request.setAttribute("vouchersList", listVouchers);
+        request.setAttribute("availableCount", availableCount);
+
+        // Cập nhật luôn cho menu ở header.jsp nhận số lượng mới nhất mà không cần đăng nhập lại
+        request.getSession().setAttribute("voucherCount", availableCount);
+
+        request.getRequestDispatcher("/WEB-INF/views/account/voucher.jsp").forward(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("action");
         VoucherDAO voucherDAO = new VoucherDAO();
 
-        if ("create".equals(action)) {
-            // 1. XỬ LÝ TẠO MÃ GIẢM GIÁ (ADMIN)
-            String code = request.getParameter("code");
-            double discountPercent = Double.parseDouble(request.getParameter("discountPercent"));
-            int quantity = Integer.parseInt(request.getParameter("quantity"));
-            Date startDate = Date.valueOf(request.getParameter("startDate"));
-            Date endDate = Date.valueOf(request.getParameter("endDate"));
-
-            // Sử dụng lớp Voucher mới thay cho VoucherModel
-            Voucher voucher = new Voucher(code, discountPercent, quantity, startDate, endDate);
-            boolean isSuccess = voucherDAO.createVoucher(voucher);
-
-            if (isSuccess) {
-                response.sendRedirect(request.getContextPath() + "/admin/voucher?msg=success");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/admin/voucher?msg=fail");
-            }
-
-        } else if ("apply".equals(action)) {
-            // 2. XỬ LÝ ÁP DỤNG MÃ KHI ĐẶT HÀNG (AJAX)
+        if ("apply".equals(action)) {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             PrintWriter out = response.getWriter();
 
             String code = request.getParameter("code");
-            Voucher voucher = voucherDAO.getVoucherByCode(code); // Sửa thành Voucher
-            
-            long currentDateMillis = System.currentTimeMillis();
-            Date today = new Date(currentDateMillis);
 
-            // Tự động nối chuỗi JSON thủ công để tránh bị lỗi đỏ do thiếu thư viện org.json
+            // Lấy tổng tiền hiện tại của giỏ hàng gửi từ giao diện lên
+            double orderAmount = 0;
+            try {
+                orderAmount = Double.parseDouble(request.getParameter("orderAmount"));
+            } catch (Exception e) {
+                orderAmount = 0;
+            }
+
+            Voucher voucher = voucherDAO.getVoucherByCode(code);
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+
             if (voucher == null) {
                 out.print("{\"status\":\"error\", \"message\":\"Mã giảm giá không tồn tại!\"}");
-            } else if (voucher.getQuantity() <= 0) {
+            } else if (voucher.getUsedCount() >= voucher.getUsageLimit()) {
                 out.print("{\"status\":\"error\", \"message\":\"Mã giảm giá đã hết lượt sử dụng!\"}");
-            } else if (today.before(voucher.getStartDate()) || today.after(voucher.getEndDate())) {
-                out.print("{\"status\":\"error\", \"message\":\"Mã giảm giá đã hết hạn hoặc chưa được áp dụng!\"}");
+            } else if (voucher.getExpiryDate() != null && now.after(voucher.getExpiryDate())) {
+                out.print("{\"status\":\"error\", \"message\":\"Mã giảm giá đã hết hạn sử dụng!\"}");
+            } else if (orderAmount < voucher.getMinOrderValue()) {
+                // 🛑 ĐIỀU KIỆN MỚI: Kiểm tra giá trị đơn hàng tối thiểu
+                out.print("{\"status\":\"error\", \"message\":\"Đơn hàng chưa đạt giá trị tối thiểu để áp dụng mã này!\"}");
             } else {
-                // Hợp lệ -> Trả về phần trăm giảm và trạng thái thành công
-                out.print("{\"status\":\"success\", \"discountPercent\":" + voucher.getDiscountPercent() + 
-                          ", \"voucherId\":" + voucher.getId() + ", \"message\":\"Áp dụng mã thành công!\"}");
+                // Thỏa mãn mọi điều kiện -> Trả về thêm max_discount để tính số tiền giảm tối đa ở Front-end
+                out.print("{\"status\":\"success\", "
+                        + "\"discountPercent\":" + voucher.getDiscountPercent() + ", "
+                        + "\"maxDiscount\":" + voucher.getMaxDiscount() + ", "
+                        + "\"message\":\"Áp dụng mã thành công!\"}");
             }
-            
             out.flush();
         }
     }
